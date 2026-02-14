@@ -2,6 +2,37 @@
 // CtrlTab - Application Logic
 // ═══════════════════════════════════════════════════════════════
 
+// ═══════════════════════════════════════════════════════════════
+// Theme System
+// ═══════════════════════════════════════════════════════════════
+
+function initTheme() {
+    const saved = localStorage.getItem('ctrltab-theme') || 'light';
+    applyTheme(saved);
+}
+
+function applyTheme(theme) {
+    if (theme === 'light') {
+        delete document.documentElement.dataset.theme;
+    } else {
+        document.documentElement.dataset.theme = theme;
+    }
+    // Update active state in dropdown
+    document.querySelectorAll('.theme-option').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.themeValue === theme);
+    });
+}
+
+function setTheme(theme) {
+    localStorage.setItem('ctrltab-theme', theme);
+    applyTheme(theme);
+    // Close dropdown
+    document.getElementById('settingsDropdown').classList.remove('open');
+}
+
+// Apply theme immediately to prevent flash
+initTheme();
+
 const API_BASE = '/api';
 
 // State
@@ -623,10 +654,26 @@ elements.addSectionBtn.addEventListener('click', showAddSectionModal);
 elements.modalClose.addEventListener('click', hideModal);
 elements.modalBackdrop.addEventListener('click', hideModal);
 
+// Settings dropdown toggle
+document.getElementById('settingsBtn').addEventListener('click', () => {
+    document.getElementById('settingsDropdown').classList.toggle('open');
+});
+
+// Close settings dropdown when clicking outside
+document.addEventListener('click', (e) => {
+    const wrapper = document.querySelector('.settings-wrapper');
+    if (wrapper && !wrapper.contains(e.target)) {
+        document.getElementById('settingsDropdown').classList.remove('open');
+    }
+});
+
 // Close modal on Escape key
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && elements.modal.classList.contains('active')) {
         hideModal();
+    }
+    if (e.key === 'Escape') {
+        document.getElementById('settingsDropdown').classList.remove('open');
     }
 });
 
