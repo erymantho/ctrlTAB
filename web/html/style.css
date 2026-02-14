@@ -837,6 +837,9 @@ body {
     border-radius: 6px;
     font-family: var(--font-main);
     transition: background 0.15s ease;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
 }
 
 .btn-text-danger:hover {
