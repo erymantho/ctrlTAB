@@ -265,11 +265,6 @@ function renderSections(sections) {
                                 <path d="M11.333 2A1.886 1.886 0 0 1 14 4.667l-9 9-3.667 1 1-3.667 9-9Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </button>
-                        <button class="btn-icon btn-danger" onclick="confirmDeleteSection(${section.id})" title="Delete section">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                <path d="M2 4h12M5.333 4V2.667a1.333 1.333 0 0 1 1.334-1.334h2.666a1.333 1.333 0 0 1 1.334 1.334V4m2 0v9.333a1.333 1.333 0 0 1-1.334 1.334H4.667a1.333 1.333 0 0 1-1.334-1.334V4h9.334Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </button>
                     </div>
                 </div>
                 <div class="links-grid">
@@ -299,11 +294,6 @@ function renderLinks(links) {
                     <button class="btn-icon" onclick="showEditLinkModal(${link.id}, ${link.section_id}, '${escapeHtml(link.title)}', '${escapeHtml(link.url)}')" title="Edit link">
                         <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
                             <path d="M11.333 2A1.886 1.886 0 0 1 14 4.667l-9 9-3.667 1 1-3.667 9-9Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </button>
-                    <button class="btn-icon btn-danger" onclick="confirmDeleteLink(${link.id})" title="Delete link">
-                        <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-                            <path d="M2 4h12M5.333 4V2.667a1.333 1.333 0 0 1 1.334-1.334h2.666a1.333 1.333 0 0 1 1.334 1.334V4m2 0v9.333a1.333 1.333 0 0 1-1.334 1.334H4.667a1.333 1.333 0 0 1-1.334-1.334V4h9.334Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </button>
                 </div>
@@ -475,6 +465,9 @@ function showEditSectionModal(sectionId, currentName) {
                 <button type="submit" class="btn-primary">Save</button>
             </div>
         </form>
+        <div class="modal-danger-zone">
+            <button type="button" class="btn-text-danger" onclick="confirmDeleteSection(${sectionId})">Delete this section</button>
+        </div>
     `);
 }
 
@@ -579,6 +572,9 @@ function showEditLinkModal(linkId, sectionId, currentTitle, currentUrl) {
                 <button type="submit" class="btn-primary">Save</button>
             </div>
         </form>
+        <div class="modal-danger-zone">
+            <button type="button" class="btn-text-danger" onclick="confirmDeleteLink(${linkId})">Delete this link</button>
+        </div>
     `);
 }
 
