@@ -46,7 +46,6 @@ const elements = {
     sectionsContainer: document.getElementById('sectionsContainer'),
     addCollectionBtn: document.getElementById('addCollectionBtn'),
     editCollectionBtn: document.getElementById('editCollectionBtn'),
-    deleteCollectionBtn: document.getElementById('deleteCollectionBtn'),
     addSectionBtn: document.getElementById('addSectionBtn'),
     modal: document.getElementById('modal'),
     modalTitle: document.getElementById('modalTitle'),
@@ -216,7 +215,6 @@ async function selectCollection(id) {
 
     // Show collection action buttons
     elements.editCollectionBtn.style.display = 'inline-flex';
-    elements.deleteCollectionBtn.style.display = 'inline-flex';
     elements.addSectionBtn.style.display = 'inline-flex';
 }
 
@@ -365,6 +363,9 @@ function showEditCollectionModal() {
                 <button type="submit" class="btn-primary">Save</button>
             </div>
         </form>
+        <div class="modal-danger-zone">
+            <button type="button" class="btn-text-danger" onclick="confirmDeleteCollection()">Delete this collection</button>
+        </div>
     `);
 }
 
@@ -417,7 +418,6 @@ async function handleDeleteCollection() {
             </div>
         `;
         elements.editCollectionBtn.style.display = 'none';
-        elements.deleteCollectionBtn.style.display = 'none';
         elements.addSectionBtn.style.display = 'none';
         hideModal();
     } catch (error) {
@@ -649,7 +649,6 @@ function extractDomain(url) {
 
 elements.addCollectionBtn.addEventListener('click', showAddCollectionModal);
 elements.editCollectionBtn.addEventListener('click', showEditCollectionModal);
-elements.deleteCollectionBtn.addEventListener('click', confirmDeleteCollection);
 elements.addSectionBtn.addEventListener('click', showAddSectionModal);
 elements.modalClose.addEventListener('click', hideModal);
 elements.modalBackdrop.addEventListener('click', hideModal);
