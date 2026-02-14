@@ -16,13 +16,12 @@ A lightweight, self-hosted bookmark and link manager to organize your links into
 - 📁 **Collections** — Group your links by project, client, or topic
 - 📑 **Sections** — Organize links within collections under named headings
 - 🔗 **Links** — Store URLs with auto-fetched favicons
+- 🎨 **Neon Cyberpunk UI** — Futuristic interface with grid backgrounds, scan lines, and RGB glow effects
+- ⚡ **Full CRUD** — Create, read, update, and delete all resources through an intuitive dashboard
 - 🐳 **Docker-ready** — Runs as a two-container stack (API + Nginx)
 - 🪶 **Lightweight** — SQLite database, no external dependencies
 - 🔒 **Self-hosted** — Your data stays on your server
-
-## Screenshots
-
-*Coming soon*
+- 📱 **Responsive** — Works on desktop, tablet, and mobile
 
 ## Quick Start
 
@@ -99,7 +98,10 @@ The default port is `8090`. Change it in `docker-compose.yml` under the `web` se
 
 ## Tech Stack
 
-- **Frontend:** HTML, CSS, JavaScript (served by Nginx)
+- **Frontend:** Vanilla HTML, CSS, JavaScript (no frameworks, no build step)
+  - Neon Cyberpunk aesthetic with Orbitron, Rajdhani, and Share Tech Mono fonts
+  - Grid backgrounds, scan lines, and RGB glow effects
+  - Fully responsive with smooth animations
 - **Backend:** Node.js, Express, better-sqlite3
 - **Database:** SQLite with WAL mode
 - **Proxy:** Nginx (Alpine)
@@ -107,14 +109,17 @@ The default port is `8090`. Change it in `docker-compose.yml` under the `web` se
 
 ## Roadmap
 
-- [ ] Dashboard frontend UI
+- [x] Dashboard frontend UI with Neon Cyberpunk theme
+- [x] Full CRUD for collections, sections, and links
+- [x] Auto-fetched favicons
 - [ ] Drag & drop reordering
 - [ ] Search across all links
 - [ ] Import/export (JSON, HTML bookmarks)
 - [ ] Tags and filtering
 - [ ] Authentication (or use behind Authentik/reverse proxy)
-- [ ] Dark/light theme toggle
+- [ ] Theme switcher (Cyberpunk / alternative themes)
 - [ ] Browser extension for quick saving
+- [ ] Keyboard shortcuts
 
 ## License
 

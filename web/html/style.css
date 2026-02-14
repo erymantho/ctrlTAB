@@ -629,7 +629,13 @@ body {
     transform: scale(1.1);
 }
 
+.btn-icon.btn-danger {
+    border-color: var(--color-neon-pink);
+    color: var(--color-neon-pink);
+}
+
 .btn-icon.btn-danger:hover {
+    background: rgba(255, 0, 110, 0.2);
     border-color: var(--color-neon-pink);
     color: var(--color-neon-pink);
     box-shadow: var(--glow-pink);
