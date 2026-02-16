@@ -16,7 +16,7 @@ A lightweight, self-hosted bookmark and link manager to organize your links into
 - 📁 **Collections** — Group your links by project, client, or topic
 - 📑 **Sections** — Organize links within collections under named headings
 - 🔗 **Links** — Store URLs with auto-fetched favicons
-- 🎨 **Themes** — Clean light theme (default) and a Neon Cyberpunk theme with grid backgrounds, scan lines, and RGB glow effects
+- 🎨 **Themes** — Light (default), Dark, and Neon Cyberpunk with grid backgrounds, scan lines, and RGB glow effects
 - ⚡ **Full CRUD** — Create, read, update, and delete all resources through an intuitive dashboard
 - 🐳 **Docker-ready** — Runs as a two-container stack (API + Nginx)
 - 🪶 **Lightweight** — SQLite database, no external dependencies
@@ -99,7 +99,7 @@ The default port is `8090`. Change it in `docker-compose.yml` under the `web` se
 ## Tech Stack
 
 - **Frontend:** Vanilla HTML, CSS, JavaScript (no frameworks, no build step)
-  - Theme switcher with Light (default) and Cyberpunk themes
+  - Theme switcher with Light (default), Dark, and Cyberpunk themes
   - Fully responsive
 - **Backend:** Node.js, Express, better-sqlite3
 - **Database:** SQLite with WAL mode
@@ -111,7 +111,7 @@ The default port is `8090`. Change it in `docker-compose.yml` under the `web` se
 - [x] Dashboard frontend UI
 - [x] Full CRUD for collections, sections, and links
 - [x] Auto-fetched favicons
-- [x] Theme switcher (Light / Cyberpunk)
+- [x] Theme switcher (Light / Dark / Cyberpunk)
 - [x] Improve offline mode (PWA)
 - [ ] New logo
 - [ ] User accounts and authentication

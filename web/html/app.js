@@ -288,7 +288,6 @@ function renderLinks(links) {
                 </div>
                 <div class="link-content">
                     <div class="link-title">${escapeHtml(link.title)}</div>
-                    <div class="link-url">${extractDomain(link.url)}</div>
                 </div>
                 <div class="link-actions" onclick="event.preventDefault(); event.stopPropagation();">
                     <button class="btn-icon" onclick="showEditLinkModal(${link.id}, ${link.section_id}, '${escapeHtml(link.title)}', '${escapeHtml(link.url)}')" title="Edit link">
