@@ -112,6 +112,8 @@ The default port is `8090`. Change it in `docker-compose.yml` under the `web` se
 - [x] Full CRUD for collections, sections, and links
 - [x] Auto-fetched favicons
 - [x] Theme switcher (Light / Cyberpunk)
+- [x] Improve offline mode (PWA)
+- [ ] New logo
 - [ ] User accounts and authentication
 - [ ] Drag & drop reordering
 - [ ] Search across all links
