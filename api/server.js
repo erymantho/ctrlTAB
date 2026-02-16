@@ -108,18 +108,74 @@ app.delete('/api/sections/:id', (req, res) => {
   res.json({ deleted: true });
 });
 
+// ─── Favicon Helper ──────────────────────────────────────────────
+async function fetchFavicon(siteUrl) {
+  try {
+    const parsed = new URL(siteUrl);
+
+    // Try fetching the page and parsing icon from HTML
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+
+    try {
+      const response = await fetch(siteUrl, {
+        signal: controller.signal,
+        headers: { 'User-Agent': 'CtrlTab/1.0' }
+      });
+      clearTimeout(timeout);
+
+      if (response.ok) {
+        const html = await response.text();
+        // Match <link rel="icon" href="..."> or <link rel="shortcut icon" href="...">
+        const iconMatch = html.match(/<link[^>]*rel=["'](?:shortcut )?icon["'][^>]*href=["']([^"']+)["'][^>]*>/i)
+          || html.match(/<link[^>]*href=["']([^"']+)["'][^>]*rel=["'](?:shortcut )?icon["'][^>]*>/i);
+
+        if (iconMatch) {
+          const iconHref = iconMatch[1];
+          // Resolve relative URLs
+          return new URL(iconHref, siteUrl).href;
+        }
+      }
+    } catch {
+      clearTimeout(timeout);
+    }
+
+    // Fallback: try /favicon.ico directly
+    try {
+      const icoUrl = `${parsed.origin}/favicon.ico`;
+      const icoController = new AbortController();
+      const icoTimeout = setTimeout(() => icoController.abort(), 3000);
+      const icoResponse = await fetch(icoUrl, {
+        method: 'HEAD',
+        signal: icoController.signal
+      });
+      clearTimeout(icoTimeout);
+
+      if (icoResponse.ok) {
+        return icoUrl;
+      }
+    } catch {
+      // ignore
+    }
+
+    // Last fallback: Google's favicon service
+    return `https://www.google.com/s2/favicons?domain=${parsed.hostname}&sz=32`;
+  } catch {
+    return null;
+  }
+}
+
 // ─── Links ────────────────────────────────────────────────────────
 app.get('/api/sections/:sectionId/links', (req, res) => {
   const links = db.prepare('SELECT * FROM links WHERE section_id = ? ORDER BY sort_order, id').all(req.params.sectionId);
   res.json(links);
 });
 
-app.post('/api/sections/:sectionId/links', (req, res) => {
+app.post('/api/sections/:sectionId/links', async (req, res) => {
   const { title, url, favicon } = req.body;
   if (!title || !url) return res.status(400).json({ error: 'title and url are required' });
 
-  // Auto-generate favicon URL if not provided
-  const faviconUrl = favicon || `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}&sz=32`;
+  const faviconUrl = favicon || await fetchFavicon(url);
   const maxOrder = db.prepare('SELECT COALESCE(MAX(sort_order), -1) + 1 AS next FROM links WHERE section_id = ?').get(req.params.sectionId);
   const result = db.prepare('INSERT INTO links (section_id, title, url, favicon, sort_order) VALUES (?, ?, ?, ?, ?)').run(req.params.sectionId, title, url, faviconUrl, maxOrder.next);
   const link = db.prepare('SELECT * FROM links WHERE id = ?').get(result.lastInsertRowid);
