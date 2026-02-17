@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   CtrlTab - Theme System
+   ctrlTAB - Theme System
    ═══════════════════════════════════════════════════════════════ */
 
 /* --- Light Theme (Default) --- */
@@ -132,22 +132,25 @@ body {
 }
 
 .logo {
-    font-family: var(--font-display);
-    font-size: 24px;
-    font-weight: 700;
     margin-bottom: var(--spacing-sm);
 }
 
-.logo-bracket {
-    color: var(--color-accent);
+.logo-img {
+    height: 32px;
+    width: auto;
+    display: block;
 }
 
-.logo-text {
-    color: var(--color-text-primary);
+.logo-dark {
+    display: none;
 }
 
-.logo-accent {
-    color: var(--color-secondary);
+[data-theme="dark"] .logo-light {
+    display: none;
+}
+
+[data-theme="dark"] .logo-dark {
+    display: block;
 }
 
 .subtitle {
@@ -1109,8 +1112,8 @@ input:checked + .toggle-track::after {
         grid-template-columns: 1fr;
     }
 
-    .logo {
-        font-size: 20px;
+    .logo-img {
+        height: 24px;
     }
 
     .collection-title {

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Self-hosted link manager">
-    <title>Login - CtrlTab</title>
+    <title>Login - ctrlTAB</title>
     <link rel="icon" href="icons/favicon.svg">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="cyberpunk.css">
@@ -32,14 +32,13 @@
         }
 
         .login-logo {
-            font-size: 42px;
-            font-family: var(--font-display);
-            font-weight: 900;
-            letter-spacing: -1px;
+            display: flex;
+            justify-content: center;
         }
 
-        .login-logo .logo-accent {
-            color: var(--color-highlight);
+        .login-logo .logo-img {
+            height: 48px;
+            width: auto;
         }
 
         .login-subtitle {
@@ -91,7 +90,8 @@
         <div class="login-box">
             <div class="login-header">
                 <div class="login-logo">
-                    <span>Ctrl</span><span class="logo-accent">Tab</span>
+                    <img class="logo-img logo-light" src="icons/ctrltab-logo.png" alt="ctrlTAB">
+                    <img class="logo-img logo-dark" src="icons/ctrltab-logo-dark.png" alt="ctrlTAB">
                 </div>
                 <div class="login-subtitle">Link Manager</div>
             </div>

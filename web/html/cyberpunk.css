@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   CtrlTab - Cyberpunk Theme
+   ctrlTAB - Cyberpunk Theme
    Separated theme file — can be removed without affecting
    light/dark themes.
    ═══════════════════════════════════════════════════════════════ */
@@ -116,32 +116,14 @@
     background: linear-gradient(135deg, rgba(255, 0, 110, 0.05), rgba(131, 56, 236, 0.05));
 }
 
-[data-theme="cyberpunk"] .logo {
-    font-size: 32px;
-    font-weight: 900;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+[data-theme="cyberpunk"] .logo-light {
+    display: none;
+}
+
+[data-theme="cyberpunk"] .logo-dark {
+    display: block;
     animation: glitchText 3s infinite;
-}
-
-[data-theme="cyberpunk"] .logo-bracket {
-    text-shadow: var(--glow-accent);
-}
-
-[data-theme="cyberpunk"] .logo-text {
-    color: var(--color-highlight);
-    text-shadow: var(--glow-highlight);
-}
-
-[data-theme="cyberpunk"] .logo-accent {
-    color: var(--color-success);
-    text-shadow: var(--glow-success);
-    animation: flicker 2s infinite alternate;
-}
-
-@keyframes flicker {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.8; }
+    filter: drop-shadow(0 0 10px var(--color-accent));
 }
 
 @keyframes glitchText {
@@ -700,8 +682,13 @@
 }
 
 /* Login page */
-[data-theme="cyberpunk"] .login-logo {
-    text-shadow: var(--glow-highlight);
+[data-theme="cyberpunk"] .login-logo .logo-light {
+    display: none;
+}
+
+[data-theme="cyberpunk"] .login-logo .logo-dark {
+    display: block;
+    filter: drop-shadow(0 0 10px var(--color-accent));
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -709,7 +696,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 @media (max-width: 768px) {
-    [data-theme="cyberpunk"] .logo {
-        font-size: 24px;
+    [data-theme="cyberpunk"] .logo-img {
+        height: 24px;
     }
 }

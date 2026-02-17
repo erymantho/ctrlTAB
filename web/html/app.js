@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// CtrlTab - Application Logic
+// ctrlTAB - Application Logic
 // ═══════════════════════════════════════════════════════════════
 
 // ═══════════════════════════════════════════════════════════════
@@ -659,7 +659,7 @@ async function handleDeleteCollection() {
         await deleteCollection(currentCollectionId);
         currentCollectionId = null;
         await loadCollections();
-        elements.collectionTitle.textContent = 'CtrlTab';
+        elements.collectionTitle.textContent = 'ctrlTAB';
         elements.sectionsContainer.innerHTML = `
             <div class="empty-state">
                 <div class="empty-icon">⌘</div>
