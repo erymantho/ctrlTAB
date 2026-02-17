@@ -54,30 +54,13 @@
             </div>
 
             <div class="sidebar-footer">
-                <button class="settings-btn" id="adminPanelBtn" style="display: none; margin-bottom: var(--spacing-sm);">
+                <button class="settings-btn" id="settingsBtn">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <path d="M12 14v-2a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v2M8 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M13.05 10.13a1.14 1.14 0 0 0 .23 1.26l.04.04a1.38 1.38 0 1 1-1.96 1.96l-.04-.04a1.14 1.14 0 0 0-1.26-.23 1.14 1.14 0 0 0-.69 1.05v.11a1.38 1.38 0 1 1-2.76 0v-.06a1.14 1.14 0 0 0-.75-1.05 1.14 1.14 0 0 0-1.26.23l-.04.04a1.38 1.38 0 1 1-1.96-1.96l.04-.04a1.14 1.14 0 0 0 .23-1.26 1.14 1.14 0 0 0-1.05-.69h-.11a1.38 1.38 0 1 1 0-2.76h.06a1.14 1.14 0 0 0 1.05-.75 1.14 1.14 0 0 0-.23-1.26l-.04-.04a1.38 1.38 0 1 1 1.96-1.96l.04.04a1.14 1.14 0 0 0 1.26.23h.06a1.14 1.14 0 0 0 .69-1.05v-.11a1.38 1.38 0 1 1 2.76 0v.06a1.14 1.14 0 0 0 .69 1.05 1.14 1.14 0 0 0 1.26-.23l.04-.04a1.38 1.38 0 1 1 1.96 1.96l-.04.04a1.14 1.14 0 0 0-.23 1.26v.06a1.14 1.14 0 0 0 1.05.69h.11a1.38 1.38 0 1 1 0 2.76h-.06a1.14 1.14 0 0 0-1.05.69Z" stroke="currentColor" stroke-width="1.5"/>
                     </svg>
-                    Users
+                    Settings
                 </button>
-                <div class="settings-wrapper">
-                    <div class="settings-dropdown" id="settingsDropdown">
-                        <div class="settings-dropdown-label">Theme</div>
-                        <button class="theme-option active" data-theme-value="light" onclick="setTheme('light')">Light (default)</button>
-                        <button class="theme-option" data-theme-value="dark" onclick="setTheme('dark')">Dark</button>
-                        <button class="theme-option" data-theme-value="cyberpunk" onclick="setTheme('cyberpunk')">Cyberpunk</button>
-                        <div class="settings-dropdown-divider"></div>
-                        <button class="settings-dropdown-item" onclick="showChangePasswordModal()">Change Password</button>
-                        <button class="settings-dropdown-item" onclick="logout()">Logout</button>
-                    </div>
-                    <button class="settings-btn" id="settingsBtn" title="Settings">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                            <path d="M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" stroke="currentColor" stroke-width="1.5"/>
-                            <path d="M13.05 10.13a1.14 1.14 0 0 0 .23 1.26l.04.04a1.38 1.38 0 1 1-1.96 1.96l-.04-.04a1.14 1.14 0 0 0-1.26-.23 1.14 1.14 0 0 0-.69 1.05v.11a1.38 1.38 0 1 1-2.76 0v-.06a1.14 1.14 0 0 0-.75-1.05 1.14 1.14 0 0 0-1.26.23l-.04.04a1.38 1.38 0 1 1-1.96-1.96l.04-.04a1.14 1.14 0 0 0 .23-1.26 1.14 1.14 0 0 0-1.05-.69h-.11a1.38 1.38 0 1 1 0-2.76h.06a1.14 1.14 0 0 0 1.05-.75 1.14 1.14 0 0 0-.23-1.26l-.04-.04a1.38 1.38 0 1 1 1.96-1.96l.04.04a1.14 1.14 0 0 0 1.26.23h.06a1.14 1.14 0 0 0 .69-1.05v-.11a1.38 1.38 0 1 1 2.76 0v.06a1.14 1.14 0 0 0 .69 1.05 1.14 1.14 0 0 0 1.26-.23l.04-.04a1.38 1.38 0 1 1 1.96 1.96l-.04.04a1.14 1.14 0 0 0-.23 1.26v.06a1.14 1.14 0 0 0 1.05.69h.11a1.38 1.38 0 1 1 0 2.76h-.06a1.14 1.14 0 0 0-1.05.69Z" stroke="currentColor" stroke-width="1.5"/>
-                        </svg>
-                        Settings
-                    </button>
-                </div>
             </div>
         </aside>
 

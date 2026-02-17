@@ -1341,10 +1341,6 @@ body {
     border-top: 1px solid var(--color-neon-purple);
 }
 
-.settings-wrapper {
-    position: relative;
-}
-
 .settings-btn {
     width: 100%;
     display: flex;
@@ -1376,118 +1372,225 @@ body {
     color: var(--color-neon-cyan);
 }
 
-.settings-dropdown {
-    display: none;
-    position: absolute;
-    bottom: 100%;
-    left: 0;
-    right: 0;
-    margin-bottom: var(--spacing-sm);
-    background: var(--color-bg-elevated);
-    border: 1px solid var(--color-bg-tertiary);
-    border-radius: 8px;
-    padding: var(--spacing-sm);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-    z-index: 50;
-}
-
-.settings-dropdown.open {
-    display: block;
-}
-
-[data-theme="cyberpunk"] .settings-dropdown {
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-neon-purple);
-    border-radius: 0;
-    box-shadow: 0 0 20px rgba(131, 56, 236, 0.3);
-}
-
-.settings-dropdown-label {
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--color-text-muted);
-    padding: var(--spacing-xs) var(--spacing-sm);
-    margin-bottom: var(--spacing-xs);
-}
-
-.theme-option {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    width: 100%;
-    padding: var(--spacing-sm) var(--spacing-md);
-    background: transparent;
-    border: none;
-    border-radius: 4px;
-    color: var(--color-text-secondary);
-    font-family: var(--font-main);
-    font-size: 14px;
-    cursor: pointer;
-    transition: background 0.15s ease;
-    text-align: left;
-}
-
-.theme-option:hover {
-    background: var(--color-bg-tertiary);
-}
-
-.theme-option.active {
-    color: var(--color-neon-cyan);
-    font-weight: 600;
-}
-
-[data-theme="cyberpunk"] .theme-option {
-    border-radius: 0;
-}
-
-[data-theme="cyberpunk"] .theme-option:hover {
-    background: rgba(131, 56, 236, 0.15);
-}
-
-[data-theme="cyberpunk"] .theme-option.active {
-    color: var(--color-neon-cyan);
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   Settings Dropdown Items
-   ═══════════════════════════════════════════════════════════════ */
-
-.settings-dropdown-divider {
-    height: 1px;
-    background: var(--color-bg-tertiary);
-    margin: var(--spacing-sm) 0;
-}
-
-.settings-dropdown-item {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    width: 100%;
-    padding: var(--spacing-sm) var(--spacing-md);
-    background: transparent;
-    border: none;
-    border-radius: 4px;
-    color: var(--color-text-secondary);
-    font-family: var(--font-main);
-    font-size: 14px;
-    cursor: pointer;
-    transition: background 0.15s ease;
-    text-align: left;
-}
-
-.settings-dropdown-item:hover {
+/* Settings button active state */
+.settings-btn.active {
     background: var(--color-bg-tertiary);
     color: var(--color-text-primary);
 }
 
-[data-theme="cyberpunk"] .settings-dropdown-item {
-    border-radius: 0;
+[data-theme="cyberpunk"] .settings-btn.active {
+    background: rgba(131, 56, 236, 0.2);
+    color: var(--color-neon-cyan);
 }
 
-[data-theme="cyberpunk"] .settings-dropdown-item:hover {
-    background: rgba(131, 56, 236, 0.15);
+/* ═══════════════════════════════════════════════════════════════
+   Settings Page
+   ═══════════════════════════════════════════════════════════════ */
+
+.settings-section {
+    margin-bottom: var(--spacing-2xl);
+    padding-bottom: var(--spacing-2xl);
+    border-bottom: 1px solid var(--color-bg-tertiary);
+}
+
+.settings-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+[data-theme="cyberpunk"] .settings-section {
+    border-bottom-color: var(--color-neon-purple);
+}
+
+.settings-section-title {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--spacing-lg);
+}
+
+[data-theme="cyberpunk"] .settings-section-title {
+    color: var(--color-neon-cyan);
+    text-shadow: var(--glow-cyan);
+}
+
+/* Theme cards */
+.theme-cards {
+    display: flex;
+    gap: var(--spacing-lg);
+    flex-wrap: wrap;
+}
+
+.theme-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    background: transparent;
+    border: 2px solid var(--color-bg-tertiary);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    font-family: var(--font-main);
+}
+
+.theme-card:hover {
+    border-color: var(--color-text-muted);
+}
+
+.theme-card.active {
+    border-color: var(--color-neon-cyan);
+    box-shadow: 0 0 0 1px var(--color-neon-cyan);
+}
+
+[data-theme="cyberpunk"] .theme-card {
+    border-radius: 0;
+    border-color: var(--color-neon-purple);
+}
+
+[data-theme="cyberpunk"] .theme-card:hover {
+    border-color: var(--color-neon-cyan);
+}
+
+[data-theme="cyberpunk"] .theme-card.active {
+    border-color: var(--color-neon-pink);
+    box-shadow: var(--glow-pink);
+}
+
+.theme-card-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+.theme-card.active .theme-card-label {
+    color: var(--color-neon-cyan);
+}
+
+[data-theme="cyberpunk"] .theme-card.active .theme-card-label {
+    color: var(--color-neon-pink);
+}
+
+/* Theme preview mini layout */
+.theme-preview {
+    width: 120px;
+    height: 80px;
+    border-radius: 4px;
+    display: flex;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.theme-preview-light {
+    background: #ffffff;
+}
+
+.theme-preview-light .tp-sidebar {
+    width: 30%;
+    background: #f8f9fa;
+    border-right: 1px solid #e9ecef;
+}
+
+.theme-preview-light .tp-bar {
+    height: 8px;
+    background: #e9ecef;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.theme-preview-light .tp-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+}
+
+.theme-preview-dark {
+    background: #1c1917;
+}
+
+.theme-preview-dark .tp-sidebar {
+    width: 30%;
+    background: #231f1d;
+    border-right: 1px solid #3f3a36;
+}
+
+.theme-preview-dark .tp-bar {
+    height: 8px;
+    background: #292524;
+    border-bottom: 1px solid #3f3a36;
+}
+
+.theme-preview-dark .tp-card {
+    background: #292524;
+    border: 1px solid #3f3a36;
+}
+
+.theme-preview-cyberpunk {
+    background: #000000;
+}
+
+.theme-preview-cyberpunk .tp-sidebar {
+    width: 30%;
+    background: #0a0a0f;
+    border-right: 1px solid #00f5ff;
+}
+
+.theme-preview-cyberpunk .tp-bar {
+    height: 8px;
+    background: #1a1a2e;
+    border-bottom: 1px solid #ff006e;
+}
+
+.theme-preview-cyberpunk .tp-card {
+    background: #1a1a2e;
+    border: 1px solid #8338ec;
+}
+
+.tp-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.tp-cards {
+    flex: 1;
+    display: flex;
+    gap: 4px;
+    padding: 6px;
+}
+
+.tp-card {
+    flex: 1;
+    border-radius: 2px;
+}
+
+/* Settings field */
+.settings-field {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-sm) 0;
+    gap: var(--spacing-lg);
+}
+
+.settings-field-label {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    min-width: 80px;
+}
+
+.settings-field-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+/* Account actions */
+.settings-account-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
 }
 
 /* ═══════════════════════════════════════════════════════════════

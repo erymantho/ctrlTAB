@@ -17,17 +17,15 @@ function applyTheme(theme) {
     } else {
         document.documentElement.dataset.theme = theme;
     }
-    // Update active state in dropdown
-    document.querySelectorAll('.theme-option').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.themeValue === theme);
+    // Update active state in settings view
+    document.querySelectorAll('.theme-card').forEach(card => {
+        card.classList.toggle('active', card.dataset.themeValue === theme);
     });
 }
 
 function setTheme(theme) {
     localStorage.setItem('ctrltab-theme', theme);
     applyTheme(theme);
-    // Close dropdown
-    document.getElementById('settingsDropdown').classList.remove('open');
 }
 
 // Apply theme immediately to prevent flash
@@ -89,6 +87,7 @@ async function checkAuth() {
 
 // State
 let currentCollectionId = null;
+let currentView = 'collections';
 let collections = [];
 
 // DOM Elements
@@ -258,16 +257,23 @@ function renderCollections() {
             <li class="collection-item">
                 <button
                     onclick="selectCollection(${collection.id})"
-                    class="${currentCollectionId === collection.id ? 'active' : ''}"
+                    class="${currentView === 'collections' && currentCollectionId === collection.id ? 'active' : ''}"
                 >
                     ${escapeHtml(collection.name)}
                 </button>
             </li>
         `)
         .join('');
+
+    // Update settings button active state
+    const settingsBtn = document.getElementById('settingsBtn');
+    if (settingsBtn) {
+        settingsBtn.classList.toggle('active', currentView === 'settings');
+    }
 }
 
 async function selectCollection(id) {
+    currentView = 'collections';
     currentCollectionId = id;
     renderCollections();
     await loadDashboard(id);
@@ -275,6 +281,176 @@ async function selectCollection(id) {
     // Show collection action buttons
     elements.editCollectionBtn.style.display = 'inline-flex';
     elements.addSectionBtn.style.display = 'inline-flex';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Settings View
+// ═══════════════════════════════════════════════════════════════
+
+function showSettings() {
+    currentView = 'settings';
+    currentCollectionId = null;
+    renderCollections();
+
+    elements.collectionTitle.textContent = 'Settings';
+    elements.editCollectionBtn.style.display = 'none';
+    elements.addSectionBtn.style.display = 'none';
+
+    const currentTheme = localStorage.getItem('ctrltab-theme') || 'light';
+    const user = getCurrentUser();
+
+    let html = '';
+
+    // Theme section
+    html += `
+        <div class="settings-section">
+            <h3 class="settings-section-title">Theme</h3>
+            <div class="theme-cards">
+                <button class="theme-card ${currentTheme === 'light' ? 'active' : ''}" data-theme-value="light" onclick="setTheme('light')">
+                    <div class="theme-preview theme-preview-light">
+                        <div class="tp-sidebar"></div>
+                        <div class="tp-content">
+                            <div class="tp-bar"></div>
+                            <div class="tp-cards">
+                                <div class="tp-card"></div>
+                                <div class="tp-card"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="theme-card-label">Light</span>
+                </button>
+                <button class="theme-card ${currentTheme === 'dark' ? 'active' : ''}" data-theme-value="dark" onclick="setTheme('dark')">
+                    <div class="theme-preview theme-preview-dark">
+                        <div class="tp-sidebar"></div>
+                        <div class="tp-content">
+                            <div class="tp-bar"></div>
+                            <div class="tp-cards">
+                                <div class="tp-card"></div>
+                                <div class="tp-card"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="theme-card-label">Dark</span>
+                </button>
+                <button class="theme-card ${currentTheme === 'cyberpunk' ? 'active' : ''}" data-theme-value="cyberpunk" onclick="setTheme('cyberpunk')">
+                    <div class="theme-preview theme-preview-cyberpunk">
+                        <div class="tp-sidebar"></div>
+                        <div class="tp-content">
+                            <div class="tp-bar"></div>
+                            <div class="tp-cards">
+                                <div class="tp-card"></div>
+                                <div class="tp-card"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="theme-card-label">Cyberpunk</span>
+                </button>
+            </div>
+        </div>
+    `;
+
+    // Account section
+    html += `
+        <div class="settings-section">
+            <h3 class="settings-section-title">Account</h3>
+            <div class="settings-field">
+                <span class="settings-field-label">Username</span>
+                <span class="settings-field-value">${user ? escapeHtml(user.username) : ''}</span>
+            </div>
+            <div class="settings-field">
+                <span class="settings-field-label">Role</span>
+                <span class="settings-field-value">
+                    <span class="badge ${user && user.is_admin ? 'badge-admin' : 'badge-user'}">
+                        ${user && user.is_admin ? 'Admin' : 'User'}
+                    </span>
+                </span>
+            </div>
+            <div class="settings-account-actions">
+                <button class="btn-secondary" onclick="showChangePasswordModal()">Change Password</button>
+                <button class="btn-danger" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    `;
+
+    // Admin: User Management section
+    if (isAdmin()) {
+        html += `
+            <div class="settings-section">
+                <h3 class="settings-section-title">User Management</h3>
+                <div id="usersTableContainer">
+                    <div style="color: var(--color-text-muted);">Loading users...</div>
+                </div>
+            </div>
+        `;
+    }
+
+    elements.sectionsContainer.innerHTML = html;
+
+    // Load users table if admin
+    if (isAdmin()) {
+        loadUsersTable();
+    }
+}
+
+async function loadUsersTable() {
+    const container = document.getElementById('usersTableContainer');
+    if (!container) return;
+
+    try {
+        const users = await apiRequest('/admin/users');
+
+        const rows = users.map(user => `
+            <tr>
+                <td>${escapeHtml(user.username)}</td>
+                <td>
+                    <span class="badge ${user.is_admin ? 'badge-admin' : 'badge-user'}">
+                        ${user.is_admin ? 'Admin' : 'User'}
+                    </span>
+                </td>
+                <td style="font-size: 12px; color: var(--color-text-muted);">
+                    ${new Date(user.created_at).toLocaleDateString()}
+                </td>
+                <td>
+                    <div style="display: flex; gap: var(--spacing-sm);">
+                        <button class="btn-icon" onclick="showEditUserModal(${user.id})" title="Edit">
+                            <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                                <path d="M11.333 2A1.886 1.886 0 0 1 14 4.667l-9 9-3.667 1 1-3.667 9-9Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                        <button class="btn-icon btn-icon-danger" onclick="confirmDeleteUser(${user.id}, '${escapeHtml(user.username)}')" title="Delete">
+                            <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                                <path d="M2 4h12M5.333 4V2.667a1.333 1.333 0 0 1 1.334-1.334h2.666a1.333 1.333 0 0 1 1.334 1.334V4m2 0v9.333a1.333 1.333 0 0 1-1.334 1.334H4.667a1.333 1.333 0 0 1-1.334-1.334V4h9.334Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+
+        container.innerHTML = `
+            <div style="margin-bottom: var(--spacing-lg);">
+                <button class="btn-primary" onclick="showAddUserModal()">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    Add User
+                </button>
+            </div>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        `;
+    } catch (error) {
+        container.innerHTML = '<div style="color: var(--color-text-muted);">Failed to load users</div>';
+    }
 }
 
 async function loadDashboard(collectionId) {
@@ -690,8 +866,6 @@ async function handleDeleteLink(linkId) {
 // ═══════════════════════════════════════════════════════════════
 
 function showChangePasswordModal() {
-    document.getElementById('settingsDropdown').classList.remove('open');
-
     showModal('Change Password', `
         <form onsubmit="handleChangePassword(event)">
             <div class="form-group">
@@ -746,72 +920,9 @@ async function handleChangePassword(event) {
 // Admin Panel
 // ═══════════════════════════════════════════════════════════════
 
-function initAdminPanel() {
-    const btn = document.getElementById('adminPanelBtn');
-    if (btn) {
-        btn.style.display = 'flex';
-        btn.addEventListener('click', showAdminPanel);
-    }
-}
-
-async function showAdminPanel() {
-    try {
-        showLoading();
-        const users = await apiRequest('/admin/users');
-        hideLoading();
-
-        const rows = users.map(user => `
-            <tr>
-                <td>${escapeHtml(user.username)}</td>
-                <td>
-                    <span class="badge ${user.is_admin ? 'badge-admin' : 'badge-user'}">
-                        ${user.is_admin ? 'Admin' : 'User'}
-                    </span>
-                </td>
-                <td style="font-size: 12px; color: var(--color-text-muted);">
-                    ${new Date(user.created_at).toLocaleDateString()}
-                </td>
-                <td>
-                    <div style="display: flex; gap: var(--spacing-sm);">
-                        <button class="btn-icon" onclick="showEditUserModal(${user.id})" title="Edit">
-                            <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-                                <path d="M11.333 2A1.886 1.886 0 0 1 14 4.667l-9 9-3.667 1 1-3.667 9-9Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </button>
-                        <button class="btn-icon btn-icon-danger" onclick="confirmDeleteUser(${user.id}, '${escapeHtml(user.username)}')" title="Delete">
-                            <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-                                <path d="M2 4h12M5.333 4V2.667a1.333 1.333 0 0 1 1.334-1.334h2.666a1.333 1.333 0 0 1 1.334 1.334V4m2 0v9.333a1.333 1.333 0 0 1-1.334 1.334H4.667a1.333 1.333 0 0 1-1.334-1.334V4h9.334Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `).join('');
-
-        showModal('User Management', `
-            <div style="margin-bottom: var(--spacing-lg);">
-                <button class="btn-primary" onclick="showAddUserModal()">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                    Add User
-                </button>
-            </div>
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>Username</th>
-                        <th>Role</th>
-                        <th>Created</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>${rows}</tbody>
-            </table>
-        `);
-    } catch (error) {
-        hideLoading();
-        alert('Failed to load users');
+async function refreshUsersInSettings() {
+    if (currentView === 'settings' && isAdmin()) {
+        await loadUsersTable();
     }
 }
 
@@ -834,7 +945,7 @@ function showAddUserModal() {
                 </label>
             </div>
             <div class="form-actions">
-                <button type="button" class="btn-secondary" onclick="showAdminPanel()">Back</button>
+                <button type="button" class="btn-secondary" onclick="refreshUsersInSettings()">Back</button>
                 <button type="submit" class="btn-primary">Create User</button>
             </div>
         </form>
@@ -856,7 +967,7 @@ async function handleAddUser(event) {
             })
         });
         hideLoading();
-        showAdminPanel();
+        refreshUsersInSettings();
     } catch (error) {
         hideLoading();
         alert('Failed to create user: ' + error.message);
@@ -889,7 +1000,7 @@ async function showEditUserModal(userId) {
                     </label>
                 </div>
                 <div class="form-actions">
-                    <button type="button" class="btn-secondary" onclick="showAdminPanel()">Back</button>
+                    <button type="button" class="btn-secondary" onclick="refreshUsersInSettings()">Back</button>
                     <button type="submit" class="btn-primary">Save</button>
                 </div>
             </form>
@@ -919,7 +1030,7 @@ async function handleEditUser(event, userId) {
             body: JSON.stringify(data)
         });
         hideLoading();
-        showAdminPanel();
+        refreshUsersInSettings();
     } catch (error) {
         hideLoading();
         alert('Failed to update user: ' + error.message);
@@ -934,7 +1045,7 @@ function confirmDeleteUser(userId, username) {
             This will permanently delete all their collections, sections, and links.
         </p>
         <div class="form-actions">
-            <button type="button" class="btn-secondary" onclick="showAdminPanel()">Cancel</button>
+            <button type="button" class="btn-secondary" onclick="refreshUsersInSettings()">Cancel</button>
             <button type="button" class="btn-danger" onclick="handleDeleteUser(${userId})">Delete</button>
         </div>
     `);
@@ -945,7 +1056,7 @@ async function handleDeleteUser(userId) {
         showLoading();
         await apiRequest(`/admin/users/${userId}`, { method: 'DELETE' });
         hideLoading();
-        showAdminPanel();
+        refreshUsersInSettings();
     } catch (error) {
         hideLoading();
         alert('Failed to delete user: ' + error.message);
@@ -972,26 +1083,13 @@ elements.addSectionBtn.addEventListener('click', showAddSectionModal);
 elements.modalClose.addEventListener('click', hideModal);
 elements.modalBackdrop.addEventListener('click', hideModal);
 
-// Settings dropdown toggle
-document.getElementById('settingsBtn').addEventListener('click', () => {
-    document.getElementById('settingsDropdown').classList.toggle('open');
-});
-
-// Close settings dropdown when clicking outside
-document.addEventListener('click', (e) => {
-    const wrapper = document.querySelector('.settings-wrapper');
-    if (wrapper && !wrapper.contains(e.target)) {
-        document.getElementById('settingsDropdown').classList.remove('open');
-    }
-});
+// Settings button
+document.getElementById('settingsBtn').addEventListener('click', showSettings);
 
 // Close modal on Escape key
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && elements.modal.classList.contains('active')) {
         hideModal();
-    }
-    if (e.key === 'Escape') {
-        document.getElementById('settingsDropdown').classList.remove('open');
     }
 });
 
@@ -1011,6 +1109,5 @@ if ('serviceWorker' in navigator) {
     const authenticated = await checkAuth();
     if (!authenticated) return;
 
-    if (isAdmin()) initAdminPanel();
     loadCollections();
 })();

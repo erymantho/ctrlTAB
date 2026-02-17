@@ -17,6 +17,7 @@ A lightweight, self-hosted bookmark and link manager to organize your links into
 - 📑 **Sections** — Organize links within collections under named headings
 - 🔗 **Links** — Store URLs with auto-fetched favicons
 - 🎨 **Themes** — Light (default), Dark, and Neon Cyberpunk with grid backgrounds, scan lines, and RGB glow effects
+- ⚙️ **Settings Page** — Dedicated settings view with theme switcher, account management, and admin user management
 - 👤 **User Accounts** — Multi-user with admin panel, JWT authentication, and per-user data isolation
 - ⚡ **Full CRUD** — Create, read, update, and delete all resources through an intuitive dashboard
 - 🐳 **Docker-ready** — Runs as a two-container stack (API + Nginx)
