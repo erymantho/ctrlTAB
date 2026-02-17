@@ -817,10 +817,18 @@ body {
 }
 
 .settings-footer {
+    text-align: center;
+    padding-top: var(--spacing-md);
     font-size: 11px;
     color: var(--color-text-muted);
     letter-spacing: 0.03em;
     opacity: 0.6;
+}
+
+.settings-version {
+    margin-top: var(--spacing-xs);
+    font-family: var(--font-mono);
+    font-size: 10px;
 }
 
 .settings-section-title {
