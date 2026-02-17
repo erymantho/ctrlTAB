@@ -371,6 +371,18 @@ function showSettings() {
         </div>
     `;
 
+    // Admin: User Management section
+    if (isAdmin()) {
+        html += `
+            <div class="settings-section">
+                <h3 class="settings-section-title">User Management</h3>
+                <div id="usersTableContainer">
+                    <div style="color: var(--color-text-muted);">Loading users...</div>
+                </div>
+            </div>
+        `;
+    }
+
     // Account section
     html += `
         <div class="settings-section">
@@ -393,18 +405,6 @@ function showSettings() {
             </div>
         </div>
     `;
-
-    // Admin: User Management section
-    if (isAdmin()) {
-        html += `
-            <div class="settings-section">
-                <h3 class="settings-section-title">User Management</h3>
-                <div id="usersTableContainer">
-                    <div style="color: var(--color-text-muted);">Loading users...</div>
-                </div>
-            </div>
-        `;
-    }
 
     elements.sectionsContainer.innerHTML = html;
 
