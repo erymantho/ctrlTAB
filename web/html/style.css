@@ -1608,7 +1608,7 @@ body {
     height: 22px;
     background: var(--color-bg-tertiary);
     border: 1px solid var(--color-text-muted);
-    border-radius: 0;
+    border-radius: 11px;
     transition: background 0.2s ease, border-color 0.2s ease;
     flex-shrink: 0;
 }
@@ -1621,7 +1621,7 @@ body {
     width: 16px;
     height: 16px;
     background: var(--color-text-muted);
-    border-radius: 0;
+    border-radius: 50%;
     transition: transform 0.2s ease, background 0.2s ease;
 }
 
@@ -1635,8 +1635,14 @@ input:checked + .toggle-track::after {
     background: #fff;
 }
 
+/* Cyberpunk: flat/rectangular toggle */
 [data-theme="cyberpunk"] .toggle-track {
+    border-radius: 0;
     border-color: var(--color-neon-purple);
+}
+
+[data-theme="cyberpunk"] .toggle-track::after {
+    border-radius: 0;
 }
 
 [data-theme="cyberpunk"] input:checked + .toggle-track {
