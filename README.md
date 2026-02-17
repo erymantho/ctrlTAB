@@ -1,4 +1,4 @@
-# ⌨️ CtrlTab
+# ⌨️ ctrlTAB
 
 **Your links. Your rules. Self-hosted.**
 
