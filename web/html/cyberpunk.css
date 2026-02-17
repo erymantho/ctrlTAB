@@ -697,6 +697,6 @@
 
 @media (max-width: 768px) {
     [data-theme="cyberpunk"] .logo-img {
-        height: 36px;
+        height: 150px;
     }
 }
