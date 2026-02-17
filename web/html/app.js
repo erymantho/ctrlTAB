@@ -410,7 +410,7 @@ function showSettings() {
 
     html += `
         <div class="settings-footer">
-            ctrlTAB by Michael Smith
+            Built by Michael Smith, with ☕ and sudo privileges
         </div>
     `;
 
