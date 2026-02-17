@@ -1593,10 +1593,15 @@ body {
     gap: var(--spacing-md);
     font-size: 14px;
     color: var(--color-text-secondary);
+}
+
+.toggle-switch {
+    display: flex;
+    align-items: center;
     cursor: pointer;
 }
 
-.toggle-label input[type="checkbox"] {
+.toggle-switch input[type="checkbox"] {
     position: absolute;
     opacity: 0;
     pointer-events: none;
