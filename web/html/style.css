@@ -1586,6 +1586,20 @@ body {
     color: var(--color-text-primary);
 }
 
+/* Settings checkbox */
+.settings-checkbox {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+}
+
+.settings-checkbox input[type="checkbox"] {
+    cursor: pointer;
+}
+
 /* Account actions */
 .settings-account-actions {
     display: flex;

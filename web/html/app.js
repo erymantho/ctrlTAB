@@ -28,6 +28,15 @@ function setTheme(theme) {
     applyTheme(theme);
 }
 
+function getOpenInNewTab() {
+    const val = localStorage.getItem('ctrltab-newtab');
+    return val === null ? true : val === 'true';
+}
+
+function setOpenInNewTab(enabled) {
+    localStorage.setItem('ctrltab-newtab', enabled);
+}
+
 // Apply theme immediately to prevent flash
 initTheme();
 
@@ -349,6 +358,18 @@ function showSettings() {
         </div>
     `;
 
+    // Preferences section
+    const openInNewTab = getOpenInNewTab();
+    html += `
+        <div class="settings-section">
+            <h3 class="settings-section-title">Preferences</h3>
+            <label class="settings-checkbox">
+                <input type="checkbox" id="openNewTabCheckbox" ${openInNewTab ? 'checked' : ''} onchange="setOpenInNewTab(this.checked)">
+                <span>Open links in new tab</span>
+            </label>
+        </div>
+    `;
+
     // Account section
     html += `
         <div class="settings-section">
@@ -515,9 +536,10 @@ function renderLinks(links) {
         return '<p style="color: var(--color-text-muted); font-size: 14px;">No links yet</p>';
     }
 
+    const target = getOpenInNewTab() ? ' target="_blank"' : '';
     return links
         .map(link => `
-            <a href="${escapeHtml(link.url)}" target="_blank" class="link-card">
+            <a href="${escapeHtml(link.url)}"${target} class="link-card">
                 <div class="link-favicon">
                     ${link.favicon ? `<img src="${escapeHtml(link.favicon)}" alt="" onerror="this.style.display='none'">` : ''}
                 </div>
