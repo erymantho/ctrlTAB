@@ -258,9 +258,11 @@ async function loadCollections() {
         collections = await getCollections();
         renderCollections();
 
-        // Auto-select first collection if available
+        // Auto-select last used collection, fall back to first
         if (collections.length > 0 && !currentCollectionId) {
-            selectCollection(collections[0].id);
+            const lastId = parseInt(localStorage.getItem('ctrltab-last-collection'));
+            const last = lastId && collections.find(c => c.id === lastId);
+            selectCollection(last ? last.id : collections[0].id);
         }
     } catch (error) {
         console.error('Failed to load collections:', error);
@@ -291,6 +293,7 @@ function renderCollections() {
 async function selectCollection(id) {
     currentView = 'collections';
     currentCollectionId = id;
+    localStorage.setItem('ctrltab-last-collection', id);
     renderCollections();
     await loadDashboard(id);
 
