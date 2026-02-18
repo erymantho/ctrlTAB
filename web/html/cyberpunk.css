@@ -849,15 +849,6 @@
    Extreme Glitch & CRT Effects
    ═══════════════════════════════════════════════════════════════ */
 
-/* Vignette — dark CRT screen edges */
-[data-theme="cyberpunk"] .scan-lines::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.8) 100%);
-    pointer-events: none;
-}
-
 /* Glitch bars — brief horizontal neon artifacts */
 [data-theme="cyberpunk"] .scan-lines::after {
     content: '';
