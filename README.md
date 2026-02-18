@@ -19,7 +19,7 @@ A lightweight, self-hosted bookmark and link manager to organize your links into
 - 🖼️ **Custom Icons** — Upload your own PNG, SVG, or ICO as a link icon
 - 🎨 **Themes** — Light (default), Dark, and Neon Cyberpunk with grid backgrounds, scan lines, and RGB glow effects
 - 🎨 **Accent Color** — Per-user accent color with preset palette and custom color picker, saved server-side
-- ↕️ **Drag & Drop** — Reorder links within a section by dragging; reset to A-Z with one click
+- ↕️ **Drag & Drop** — Reorder links within a section and sections within a collection by dragging; reset links to A-Z with one click
 - ⚙️ **Settings Page** — Dedicated settings view with theme switcher, accent color picker, account management, and admin user management
 - 👤 **User Accounts** — Multi-user with admin panel, JWT authentication, and per-user data isolation
 - ⚡ **Full CRUD** — Create, read, update, and delete all resources through an intuitive dashboard
@@ -161,7 +161,7 @@ docker compose up -d
 - [x] Improve offline mode (PWA)
 - [x] New logo
 - [x] User accounts and authentication
-- [x] Drag & drop reordering of links (with A-Z sort button per section)
+- [x] Drag & drop reordering of links (with A-Z sort button per section) and sections
 - [ ] Search across all links
 - [ ] Import/export (JSON, HTML bookmarks)
 - [ ] Tags and filtering

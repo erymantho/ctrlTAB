@@ -374,6 +374,19 @@ app.delete('/api/sections/:id', authenticateToken, (req, res) => {
   res.json({ deleted: true });
 });
 
+app.put('/api/collections/:collectionId/sections/reorder', authenticateToken, (req, res) => {
+  if (!ownsCollection(req.params.collectionId, req.user.id)) return res.status(404).json({ error: 'Not found' });
+
+  const { order } = req.body;
+  if (!Array.isArray(order)) return res.status(400).json({ error: 'order must be an array' });
+
+  const update = db.prepare('UPDATE sections SET sort_order = ? WHERE id = ? AND collection_id = ?');
+  db.transaction(() => {
+    order.forEach((id, index) => update.run(index, id, req.params.collectionId));
+  })();
+  res.json({ ok: true });
+});
+
 // ─── Favicon Helper ──────────────────────────────────────────────
 function isPrivateHostname(hostname) {
   if (hostname === 'localhost') return true;

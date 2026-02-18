@@ -333,6 +333,13 @@ async function reorderLinks(sectionId, orderedIds) {
     });
 }
 
+async function reorderSections(collectionId, orderedIds) {
+    return apiRequest(`/collections/${collectionId}/sections/reorder`, {
+        method: 'PUT',
+        body: JSON.stringify({ order: orderedIds }),
+    });
+}
+
 async function uploadIcon(file) {
     const formData = new FormData();
     formData.append('icon', file);
@@ -702,6 +709,16 @@ function renderSections(sections) {
             return `
             <div class="section" data-section-id="${section.id}">
                 <div class="section-header">
+                    <div class="section-drag-handle" draggable="true" title="Drag to reorder">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <circle cx="4" cy="3" r="1.2" fill="currentColor"/>
+                            <circle cx="10" cy="3" r="1.2" fill="currentColor"/>
+                            <circle cx="4" cy="7" r="1.2" fill="currentColor"/>
+                            <circle cx="10" cy="7" r="1.2" fill="currentColor"/>
+                            <circle cx="4" cy="11" r="1.2" fill="currentColor"/>
+                            <circle cx="10" cy="11" r="1.2" fill="currentColor"/>
+                        </svg>
+                    </div>
                     <h3 class="section-title">${escapeHtml(section.name)}</h3>
                     <div class="section-actions">
                         <button class="btn-icon btn-icon--labeled" onclick="showAddLinkModal(${section.id})" title="Add link">
@@ -787,9 +804,11 @@ function renderLinks(links, sectionId) {
 // ═══════════════════════════════════════════════════════════════
 
 let _draggingCard = null;
+let _draggingSection = null;
 
 function initDragAndDrop() {
     _draggingCard = null;
+    _draggingSection = null;
 
     document.querySelectorAll('.links-grid').forEach(grid => {
         grid.addEventListener('dragstart', e => {
@@ -818,6 +837,46 @@ function initDragAndDrop() {
             await reorderLinks(sectionId, orderedIds);
         });
     });
+
+    const container = document.getElementById('sectionsContainer');
+    if (!container) return;
+
+    container.addEventListener('dragstart', e => {
+        const handle = e.target.closest('.section-drag-handle');
+        if (!handle) return;
+        const section = handle.closest('.section[data-section-id]');
+        if (!section) return;
+        _draggingSection = section;
+        section.classList.add('section-dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.stopPropagation();
+    });
+
+    container.addEventListener('dragover', e => {
+        if (!_draggingSection) return;
+        e.preventDefault();
+        const after = getSectionAfterElement(container, e.clientY);
+        if (after) container.insertBefore(_draggingSection, after);
+        else container.appendChild(_draggingSection);
+    });
+
+    container.addEventListener('dragend', async () => {
+        if (!_draggingSection) return;
+        _draggingSection.classList.remove('section-dragging');
+        const orderedIds = [...container.querySelectorAll('.section[data-section-id]')]
+            .map(el => parseInt(el.dataset.sectionId));
+        _draggingSection = null;
+        await reorderSections(currentCollectionId, orderedIds);
+    });
+}
+
+function getSectionAfterElement(container, y) {
+    const sections = [...container.querySelectorAll('.section[data-section-id]:not(.section-dragging)')];
+    for (const section of sections) {
+        const box = section.getBoundingClientRect();
+        if (y < box.top + box.height / 2) return section;
+    }
+    return null;
 }
 
 function getDragAfterElement(grid, x, y) {
