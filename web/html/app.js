@@ -97,6 +97,7 @@ function setOpenInNewTab(enabled) {
 }
 
 // Apply theme immediately to prevent flash
+let _accentColor = null;
 initTheme();
 
 // ═══════════════════════════════════════════════════════════════
@@ -157,7 +158,6 @@ async function checkAuth() {
 let currentCollectionId = null;
 let currentView = 'collections';
 let collections = [];
-let _accentColor = null;
 
 // DOM Elements
 const elements = {
