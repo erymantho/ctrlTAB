@@ -43,6 +43,11 @@ async function loadUserPreferences() {
     try {
         const prefs = await apiRequest('/auth/preferences');
         _accentColor = prefs.accentColor || null;
+        if (_accentColor) {
+            localStorage.setItem('ctrltab-accent', _accentColor);
+        } else {
+            localStorage.removeItem('ctrltab-accent');
+        }
         applyAccentColor(_accentColor);
     } catch {}
 }
@@ -61,6 +66,7 @@ function updateAccentPreview(color) {
 
 async function handleAccentColorChange(color) {
     _accentColor = color;
+    localStorage.setItem('ctrltab-accent', color);
     applyAccentColor(color);
     const customBtn = document.querySelector('.accent-preset-custom');
     if (customBtn) {
@@ -80,6 +86,7 @@ async function handleAccentColorChange(color) {
 
 async function selectAccentPreset(color) {
     _accentColor = color;
+    localStorage.setItem('ctrltab-accent', color);
     applyAccentColor(color);
     document.querySelectorAll('.accent-preset[data-color]').forEach(el => {
         el.classList.toggle('active', el.dataset.color === color);
@@ -113,10 +120,12 @@ function setOpenInNewTab(enabled) {
     localStorage.setItem('ctrltab-newtab', enabled);
 }
 
-// Apply theme immediately to prevent flash
+// Apply theme and accent color immediately to prevent flash
 let _accentColor = null;
 const ACCENT_PRESETS = ['#e2003d', '#e8650a', '#d4a017', '#198754', '#0d6efd', '#6f42c1', '#d63384'];
 initTheme();
+_accentColor = localStorage.getItem('ctrltab-accent') || null;
+applyAccentColor(_accentColor);
 
 // ═══════════════════════════════════════════════════════════════
 // Authentication
