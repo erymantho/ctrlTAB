@@ -109,6 +109,7 @@ async function selectAccentPreset(color) {
 function setTheme(theme) {
     localStorage.setItem('ctrltab-theme', theme);
     applyTheme(theme);
+    if (currentView === 'settings') showSettings();
 }
 
 function getOpenInNewTab() {
