@@ -340,11 +340,11 @@ body {
     opacity: 1;
 }
 
-.btn-sort-alpha {
+.btn-icon.btn-sort-alpha {
     display: none;
 }
 
-.section--editing .btn-sort-alpha {
+.section--editing .btn-icon.btn-sort-alpha {
     display: inline-flex;
 }
 

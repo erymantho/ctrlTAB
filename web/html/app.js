@@ -742,7 +742,7 @@ function renderLinks(links, sectionId) {
         .map(link => {
             const faviconSrc = getFaviconSrc(link);
             return `
-            <a href="${escapeHtml(link.url)}"${target} class="link-card" data-link-id="${link.id}">
+            <a href="${escapeHtml(link.url)}"${target} class="link-card" draggable="false" data-link-id="${link.id}">
                 <div class="link-favicon">
                     ${faviconSrc ? `<img src="${escapeHtml(faviconSrc)}" alt="" onerror="this.style.display='none'">` : ''}
                 </div>
