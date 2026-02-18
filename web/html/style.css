@@ -503,6 +503,15 @@ body {
     transform: scale(0.95);
 }
 
+.btn-icon--labeled {
+    width: auto;
+    padding: 0 10px;
+    gap: 6px;
+    font-size: 13px;
+    font-family: var(--font-main);
+    font-weight: 500;
+}
+
 .btn-primary {
     padding: var(--spacing-md) var(--spacing-xl);
     background: var(--color-accent);

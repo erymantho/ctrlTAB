@@ -680,21 +680,24 @@ function renderSections(sections) {
                     <h3 class="section-title">${escapeHtml(section.name)}</h3>
                     <div class="section-actions">
                         ${links.length > 1 ? `
-                        <button class="btn-icon" onclick="sortSectionAlpha(${section.id})" title="Sort A-Z">
+                        <button class="btn-icon btn-icon--labeled" onclick="sortSectionAlpha(${section.id})" title="Sort A-Z">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                 <path d="M2 4h7M2 8h5M2 12h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                                 <path d="M11 3l2 2 2-2M13 5V13M11 11l2 2 2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
+                            <span>Sort A-Z</span>
                         </button>` : ''}
-                        <button class="btn-icon" onclick="showAddLinkModal(${section.id})" title="Add link">
+                        <button class="btn-icon btn-icon--labeled" onclick="showAddLinkModal(${section.id})" title="Add link">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                 <path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                             </svg>
+                            <span>Add link</span>
                         </button>
-                        <button class="btn-icon" onclick="showEditSectionModal(${section.id}, '${escapeHtml(section.name)}')" title="Edit section">
+                        <button class="btn-icon btn-icon--labeled" onclick="showEditSectionModal(${section.id}, '${escapeHtml(section.name)}')" title="Edit section">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                 <path d="M11.333 2A1.886 1.886 0 0 1 14 4.667l-9 9-3.667 1 1-3.667 9-9Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
+                            <span>Edit section</span>
                         </button>
                     </div>
                 </div>
