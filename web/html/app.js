@@ -680,7 +680,7 @@ function renderSections(sections) {
                     <h3 class="section-title">${escapeHtml(section.name)}</h3>
                     <div class="section-actions">
                         ${links.length > 1 ? `
-                        <button class="btn-icon btn-sort-alpha" onclick="sortSectionAlpha(${section.id})" title="Sort A-Z">
+                        <button class="btn-icon" onclick="sortSectionAlpha(${section.id})" title="Sort A-Z">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                 <path d="M2 4h7M2 8h5M2 12h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                                 <path d="M11 3l2 2 2-2M13 5V13M11 11l2 2 2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -696,17 +696,6 @@ function renderSections(sections) {
                                 <path d="M11.333 2A1.886 1.886 0 0 1 14 4.667l-9 9-3.667 1 1-3.667 9-9Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </button>
-                        ${links.length > 0 ? `
-                        <button class="btn-icon btn-edit-order" onclick="toggleSectionEdit(${section.id})" title="Edit order">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                <circle cx="6" cy="4" r="1.2" fill="currentColor"/>
-                                <circle cx="10" cy="4" r="1.2" fill="currentColor"/>
-                                <circle cx="6" cy="8" r="1.2" fill="currentColor"/>
-                                <circle cx="10" cy="8" r="1.2" fill="currentColor"/>
-                                <circle cx="6" cy="12" r="1.2" fill="currentColor"/>
-                                <circle cx="10" cy="12" r="1.2" fill="currentColor"/>
-                            </svg>
-                        </button>` : ''}
                     </div>
                 </div>
                 <div class="links-grid" data-section-id="${section.id}">
@@ -742,7 +731,7 @@ function renderLinks(links, sectionId) {
         .map(link => {
             const faviconSrc = getFaviconSrc(link);
             return `
-            <a href="${escapeHtml(link.url)}"${target} class="link-card" draggable="false" data-link-id="${link.id}">
+            <a href="${escapeHtml(link.url)}"${target} class="link-card" draggable="true" data-link-id="${link.id}">
                 <div class="link-favicon">
                     ${faviconSrc ? `<img src="${escapeHtml(faviconSrc)}" alt="" onerror="this.style.display='none'">` : ''}
                 </div>
@@ -765,20 +754,6 @@ function renderLinks(links, sectionId) {
 // ═══════════════════════════════════════════════════════════════
 // Drag-and-Drop Link Reordering
 // ═══════════════════════════════════════════════════════════════
-
-function toggleSectionEdit(sectionId) {
-    const sectionEl = document.querySelector(`.section[data-section-id="${sectionId}"]`);
-    if (!sectionEl) return;
-    const isEditing = sectionEl.classList.toggle('section--editing');
-    sectionEl.querySelectorAll('.link-card[data-link-id]').forEach(card => {
-        card.draggable = isEditing;
-    });
-    const btn = sectionEl.querySelector('.btn-edit-order');
-    if (btn) {
-        btn.classList.toggle('active', isEditing);
-        btn.title = isEditing ? 'Done' : 'Edit order';
-    }
-}
 
 let _draggingCard = null;
 
