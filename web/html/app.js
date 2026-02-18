@@ -225,11 +225,16 @@ async function deleteLink(id) {
 // UI Functions
 // ═══════════════════════════════════════════════════════════════
 
+let loadingTimer = null;
+
 function showLoading() {
-    elements.loadingOverlay.classList.add('active');
+    loadingTimer = setTimeout(() => {
+        elements.loadingOverlay.classList.add('active');
+    }, 150);
 }
 
 function hideLoading() {
+    clearTimeout(loadingTimer);
     elements.loadingOverlay.classList.remove('active');
 }
 
