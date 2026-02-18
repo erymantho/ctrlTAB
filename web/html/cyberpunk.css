@@ -116,12 +116,7 @@
     background: linear-gradient(135deg, rgba(255, 0, 110, 0.05), rgba(131, 56, 236, 0.05));
 }
 
-[data-theme="cyberpunk"] .logo-light {
-    display: none;
-}
-
-[data-theme="cyberpunk"] .logo-dark {
-    display: block;
+[data-theme="cyberpunk"] .logo-svg {
     animation: glitchText 3s infinite;
     filter: drop-shadow(0 0 10px var(--color-accent));
 }
@@ -682,12 +677,7 @@
 }
 
 /* Login page */
-[data-theme="cyberpunk"] .login-logo .logo-light {
-    display: none;
-}
-
-[data-theme="cyberpunk"] .login-logo .logo-dark {
-    display: block;
+[data-theme="cyberpunk"] .login-logo .logo-svg {
     filter: drop-shadow(0 0 10px var(--color-accent));
 }
 
@@ -696,7 +686,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 @media (max-width: 768px) {
-    [data-theme="cyberpunk"] .logo-img {
+    [data-theme="cyberpunk"] .logo-svg {
         height: 100px;
     }
 }

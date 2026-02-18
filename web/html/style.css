@@ -136,22 +136,18 @@ body {
     cursor: pointer;
 }
 
-.logo-img {
+.logo-svg {
     height: 150px;
     width: auto;
     display: block;
 }
 
-.logo-dark {
-    display: none;
-}
+.logo-svg .logo-main  { fill: #231f1d; }
+.logo-svg .logo-accent { fill: var(--color-accent); }
 
-[data-theme="dark"] .logo-light {
-    display: none;
-}
-
-[data-theme="dark"] .logo-dark {
-    display: block;
+[data-theme="dark"] .logo-svg .logo-main,
+[data-theme="cyberpunk"] .logo-svg .logo-main {
+    fill: var(--color-text-primary);
 }
 
 .subtitle {
