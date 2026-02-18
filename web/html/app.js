@@ -1059,6 +1059,7 @@ function faviconFormGroup(currentValue = '') {
                 <div class="icon-upload-actions">
                     <button type="button" class="btn-secondary" onclick="document.getElementById('faviconFileInput').click()">Upload icon</button>
                     <button type="button" class="btn-text-danger" id="faviconRemoveBtn" style="${hasIcon ? '' : 'display:none'}" onclick="removeIcon()">Remove</button>
+                    <p class="icon-upload-hint">PNG, SVG or ICO &middot; max 512 KB</p>
                 </div>
             </div>
         </div>`;

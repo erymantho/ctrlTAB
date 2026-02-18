@@ -702,6 +702,14 @@ body {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+.icon-upload-hint {
+    width: 100%;
+    margin: 0;
+    font-size: 12px;
+    color: var(--color-text-muted);
 }
 
 .form-actions {
