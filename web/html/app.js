@@ -550,6 +550,20 @@ function renderSections(sections) {
         .join('');
 }
 
+function getFaviconSrc(link) {
+    if (link.favicon) return link.favicon;
+    try {
+        const parsed = new URL(link.url);
+        const h = parsed.hostname;
+        const m = h.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+        const isLocal = h === 'localhost' || (m && (+m[1] === 10 || +m[1] === 127
+            || (+m[1] === 172 && +m[2] >= 16 && +m[2] <= 31)
+            || (+m[1] === 192 && +m[2] === 168)));
+        if (isLocal) return `${parsed.origin}/favicon.ico`;
+    } catch {}
+    return null;
+}
+
 function renderLinks(links) {
     if (links.length === 0) {
         return '<p style="color: var(--color-text-muted); font-size: 14px;">No links yet</p>';
@@ -557,10 +571,12 @@ function renderLinks(links) {
 
     const target = getOpenInNewTab() ? ' target="_blank"' : '';
     return links
-        .map(link => `
+        .map(link => {
+            const faviconSrc = getFaviconSrc(link);
+            return `
             <a href="${escapeHtml(link.url)}"${target} class="link-card">
                 <div class="link-favicon">
-                    ${link.favicon ? `<img src="${escapeHtml(link.favicon)}" alt="" onerror="this.style.display='none'">` : ''}
+                    ${faviconSrc ? `<img src="${escapeHtml(faviconSrc)}" alt="" onerror="this.style.display='none'">` : ''}
                 </div>
                 <div class="link-content">
                     <div class="link-title">${escapeHtml(link.title)}</div>
@@ -573,7 +589,8 @@ function renderLinks(links) {
                     </button>
                 </div>
             </a>
-        `)
+        `;
+        })
         .join('');
 }
 

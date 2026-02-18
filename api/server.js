@@ -321,9 +321,20 @@ app.delete('/api/sections/:id', authenticateToken, (req, res) => {
 });
 
 // ─── Favicon Helper ──────────────────────────────────────────────
+function isPrivateHostname(hostname) {
+  if (hostname === 'localhost') return true;
+  const m = hostname.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+  if (m) {
+    const [a, b] = [+m[1], +m[2]];
+    return a === 10 || a === 127 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168);
+  }
+  return false;
+}
+
 function fetchFavicon(siteUrl) {
   try {
     const { hostname } = new URL(siteUrl);
+    if (isPrivateHostname(hostname)) return null;
     return `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`;
   } catch {
     return null;
