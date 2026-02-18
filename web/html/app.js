@@ -48,15 +48,28 @@ async function loadUserPreferences() {
 }
 
 function updateAccentPreview(color) {
-    const swatch = document.getElementById('accentSwatch');
-    const resetBtn = document.getElementById('accentResetBtn');
-    if (swatch) swatch.style.background = color;
-    if (resetBtn) resetBtn.style.display = '';
+    applyAccentColor(color);
+    const customBtn = document.querySelector('.accent-preset-custom');
+    if (customBtn) {
+        customBtn.style.background = color;
+        customBtn.classList.add('active');
+        const icon = customBtn.querySelector('.accent-preset-custom-icon');
+        if (icon) icon.style.opacity = '0';
+    }
+    document.querySelectorAll('.accent-preset[data-color]').forEach(el => el.classList.remove('active'));
 }
 
 async function handleAccentColorChange(color) {
     _accentColor = color;
     applyAccentColor(color);
+    const customBtn = document.querySelector('.accent-preset-custom');
+    if (customBtn) {
+        customBtn.style.background = color;
+        customBtn.classList.add('active');
+        const icon = customBtn.querySelector('.accent-preset-custom-icon');
+        if (icon) icon.style.opacity = '0';
+    }
+    document.querySelectorAll('.accent-preset[data-color]').forEach(el => el.classList.remove('active'));
     try {
         await apiRequest('/auth/preferences', {
             method: 'PUT',
@@ -65,19 +78,23 @@ async function handleAccentColorChange(color) {
     } catch {}
 }
 
-async function resetAccentColor() {
-    _accentColor = null;
-    applyAccentColor(null);
-    const input = document.getElementById('accentColorInput');
-    const swatch = document.getElementById('accentSwatch');
-    const resetBtn = document.getElementById('accentResetBtn');
-    if (input) input.value = '#e2003d';
-    if (swatch) swatch.style.background = 'var(--color-accent)';
-    if (resetBtn) resetBtn.style.display = 'none';
+async function selectAccentPreset(color) {
+    _accentColor = color;
+    applyAccentColor(color);
+    document.querySelectorAll('.accent-preset[data-color]').forEach(el => {
+        el.classList.toggle('active', el.dataset.color === color);
+    });
+    const customBtn = document.querySelector('.accent-preset-custom');
+    if (customBtn) {
+        customBtn.classList.remove('active');
+        customBtn.style.background = '';
+        const icon = customBtn.querySelector('.accent-preset-custom-icon');
+        if (icon) icon.style.opacity = '';
+    }
     try {
         await apiRequest('/auth/preferences', {
             method: 'PUT',
-            body: JSON.stringify({ accentColor: null }),
+            body: JSON.stringify({ accentColor: color }),
         });
     } catch {}
 }
@@ -98,6 +115,7 @@ function setOpenInNewTab(enabled) {
 
 // Apply theme immediately to prevent flash
 let _accentColor = null;
+const ACCENT_PRESETS = ['#e2003d', '#e8650a', '#d4a017', '#198754', '#0d6efd', '#6f42c1', '#d63384'];
 initTheme();
 
 // ═══════════════════════════════════════════════════════════════
@@ -439,20 +457,35 @@ function showSettings() {
                     <span class="theme-card-label">Cyberpunk</span>
                 </button>
             </div>
-            <div class="accent-color-row">
+            <div class="accent-color-section">
                 <span class="accent-color-label">Accent color</span>
-                <div class="accent-color-controls">
-                    <label class="accent-swatch-label" title="Choose accent color">
-                        <span class="accent-swatch" id="accentSwatch"
-                              style="background:${_accentColor || 'var(--color-accent)'}"></span>
-                        <input type="color" id="accentColorInput"
-                               value="${_accentColor || '#e2003d'}"
-                               oninput="updateAccentPreview(this.value)"
-                               onchange="handleAccentColorChange(this.value)">
-                    </label>
-                    <button class="btn-text" id="accentResetBtn"
-                            style="${_accentColor ? '' : 'display:none'}"
-                            onclick="resetAccentColor()">Reset</button>
+                <div class="accent-presets">
+                    ${(() => {
+                        const isCustom = !!_accentColor && !ACCENT_PRESETS.includes(_accentColor);
+                        const effective = _accentColor || '#e2003d';
+                        return ACCENT_PRESETS.map(color => `
+                            <button class="accent-preset${!isCustom && color === effective ? ' active' : ''}"
+                                    data-color="${color}"
+                                    style="background:${color}"
+                                    onclick="selectAccentPreset('${color}')"
+                                    title="${color}"></button>
+                        `).join('') + `
+                            <label class="accent-preset accent-preset-custom${isCustom ? ' active' : ''}"
+                                   title="Custom color"
+                                   style="${isCustom ? `background:${_accentColor}` : ''}">
+                                <span class="accent-preset-custom-icon"${isCustom ? ' style="opacity:0"' : ''}>
+                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                        <path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                    </svg>
+                                </span>
+                                <input type="color" id="accentColorInput"
+                                       value="${_accentColor || '#e2003d'}"
+                                       style="position:absolute;opacity:0;width:0;height:0;pointer-events:none"
+                                       oninput="updateAccentPreview(this.value)"
+                                       onchange="handleAccentColorChange(this.value)">
+                            </label>
+                        `;
+                    })()}
                 </div>
             </div>
         </div>

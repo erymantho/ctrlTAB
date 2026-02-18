@@ -990,52 +990,72 @@ body {
     border-radius: 2px;
 }
 
-/* Accent color picker */
-.accent-color-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--spacing-sm) 0;
+/* Accent color preset palette */
+.accent-color-section {
     margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
     border-top: 1px solid var(--color-bg-tertiary);
 }
 
 .accent-color-label {
     font-size: 0.875rem;
     color: var(--color-text-secondary);
+    display: block;
+    margin-bottom: var(--spacing-sm);
 }
 
-.accent-color-controls {
+.accent-presets {
     display: flex;
+    gap: 8px;
     align-items: center;
-    gap: var(--spacing-sm);
+    flex-wrap: wrap;
 }
 
-.accent-swatch-label {
+.accent-preset {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: none;
     cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    position: relative;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    outline: none;
+}
+
+.accent-preset:hover {
+    transform: scale(1.2);
+}
+
+.accent-preset.active {
+    box-shadow: 0 0 0 2px var(--color-bg-primary), 0 0 0 4px var(--color-accent);
+}
+
+.accent-preset-custom {
+    background: var(--color-bg-secondary);
+    border: 1.5px dashed var(--color-text-muted) !important;
+    color: var(--color-text-muted);
     display: flex;
     align-items: center;
+    justify-content: center;
+    cursor: pointer;
     position: relative;
 }
 
-.accent-swatch {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    border: 2px solid var(--color-bg-tertiary);
-    flex-shrink: 0;
-    transition: border-color 0.15s;
+.accent-preset-custom:hover {
+    border-color: var(--color-text-secondary) !important;
+    color: var(--color-text-secondary);
 }
 
-.accent-swatch-label:hover .accent-swatch {
-    border-color: var(--color-text-muted);
+.accent-preset-custom.active {
+    border: none !important;
 }
 
-.accent-swatch-label input[type="color"] {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
+.accent-preset-custom-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     pointer-events: none;
 }
 
