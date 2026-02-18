@@ -389,6 +389,12 @@ function renderCollections() {
     }
 }
 
+function goHome() {
+    const lastId = parseInt(localStorage.getItem('ctrltab-last-collection'));
+    const target = (lastId && collections.find(c => c.id === lastId)) || collections[0];
+    if (target) selectCollection(target.id);
+}
+
 async function selectCollection(id) {
     currentView = 'collections';
     currentCollectionId = id;

@@ -133,6 +133,7 @@ body {
 
 .logo {
     margin-bottom: 0;
+    cursor: pointer;
 }
 
 .logo-img {
