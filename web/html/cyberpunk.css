@@ -122,10 +122,41 @@
 }
 
 @keyframes glitchText {
-    0%, 90%, 100% { transform: translate(0); }
-    92% { transform: translate(-2px, 2px); }
-    94% { transform: translate(2px, -2px); }
-    96% { transform: translate(-2px, -2px); }
+    0%, 70%, 100% {
+        transform: translate(0);
+        text-shadow: 0 0 8px var(--color-accent);
+        filter: none;
+    }
+    72% {
+        transform: translate(-5px, 1px);
+        text-shadow: 4px 0 #ff006e, -4px 0 #00f5ff, 0 0 15px var(--color-accent);
+        filter: blur(0.5px);
+    }
+    74% {
+        transform: translate(5px, -2px);
+        text-shadow: -4px 0 #ff006e, 4px 0 #00f5ff;
+        filter: brightness(1.6);
+    }
+    76% {
+        transform: translate(-3px, 2px);
+        text-shadow: 3px 0 #8338ec, -3px 0 #00f5ff;
+        filter: blur(1px);
+    }
+    78% {
+        transform: translate(0);
+        text-shadow: 0 0 8px var(--color-accent);
+        filter: none;
+    }
+    88% { transform: translate(-2px, 0); opacity: 0.8; }
+    90% {
+        transform: translate(2px, 0);
+        text-shadow: 2px 0 #ff006e, -2px 0 #00f5ff, 0 0 8px var(--color-accent);
+        opacity: 1;
+    }
+    92% {
+        transform: translate(0);
+        text-shadow: 0 0 8px var(--color-accent);
+    }
 }
 
 [data-theme="cyberpunk"] .subtitle {
@@ -301,6 +332,7 @@
     letter-spacing: 0.15em;
     color: var(--color-accent);
     text-shadow: var(--glow-accent);
+    animation: sectionTitleGlitch 9s infinite;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -689,4 +721,131 @@
     [data-theme="cyberpunk"] .logo-text {
         font-size: 24px;
     }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Extreme Glitch & CRT Effects
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Vignette — dark CRT screen edges */
+[data-theme="cyberpunk"] .scan-lines::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.8) 100%);
+    pointer-events: none;
+}
+
+/* Glitch bars — brief horizontal neon artifacts */
+[data-theme="cyberpunk"] .scan-lines::after {
+    content: '';
+    position: fixed;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    pointer-events: none;
+    opacity: 0;
+    animation: glitchBar 11s linear infinite;
+}
+
+@keyframes glitchBar {
+    0%, 85%, 100% { opacity: 0; top: 0; }
+    86% {
+        opacity: 1;
+        top: 18%;
+        background: var(--color-accent);
+        box-shadow: 0 0 15px var(--color-accent), 0 0 40px var(--color-accent);
+        transform: translateX(-30px) scaleX(0.6);
+    }
+    87% {
+        opacity: 0.9;
+        top: 52%;
+        background: var(--color-highlight);
+        box-shadow: 0 0 15px var(--color-highlight);
+        transform: translateX(25px) scaleX(1.3);
+    }
+    88% {
+        opacity: 0.7;
+        top: 77%;
+        background: var(--color-success);
+        box-shadow: 0 0 15px var(--color-success);
+        transform: translateX(-15px) scaleX(0.4);
+    }
+    89% { opacity: 0; }
+}
+
+/* CRT screen flicker */
+@keyframes crtFlicker {
+    0%, 100% { opacity: 1; }
+    34.99% { opacity: 1; }
+    35%     { opacity: 0.55; }
+    35.05%  { opacity: 1; }
+    69.99%  { opacity: 1; }
+    70%     { opacity: 0.8; }
+    70.05%  { opacity: 1; }
+}
+
+[data-theme="cyberpunk"] .app-container {
+    animation: crtFlicker 13s linear infinite;
+}
+
+/* Blinking cursor after subtitle */
+[data-theme="cyberpunk"] .subtitle::after {
+    content: '_';
+    margin-left: 1px;
+    color: var(--color-accent);
+    animation: cursorBlink 1.2s step-end infinite;
+}
+
+@keyframes cursorBlink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0; }
+}
+
+/* Section title — periodic RGB-split glitch with slice displacement */
+@keyframes sectionTitleGlitch {
+    0%, 87%, 100% {
+        transform: translate(0);
+        text-shadow: var(--glow-accent);
+        clip-path: none;
+    }
+    88% {
+        transform: translateX(-8px);
+        text-shadow: 6px 0 #ff006e, -6px 0 #00f5ff;
+        clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+    }
+    88.5% {
+        transform: translateX(8px);
+        text-shadow: -6px 0 #ff006e, 6px 0 #00f5ff;
+        clip-path: polygon(0 45%, 100% 45%, 100% 100%, 0 100%);
+    }
+    89% {
+        transform: translate(0);
+        text-shadow: var(--glow-accent);
+        clip-path: none;
+    }
+}
+
+/* Card hover — link title RGB split jitter */
+@keyframes cardTitleGlitch {
+    0%, 70%, 100% {
+        transform: translateX(0);
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+    75% {
+        transform: translateX(-3px);
+        text-shadow: 3px 0 #ff006e, -3px 0 #00f5ff;
+    }
+    80% {
+        transform: translateX(3px);
+        text-shadow: -3px 0 #ff006e, 3px 0 #00f5ff;
+    }
+    85% {
+        transform: translateX(0);
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+}
+
+[data-theme="cyberpunk"] .link-card:hover .link-title {
+    animation: cardTitleGlitch 0.4s infinite;
 }
