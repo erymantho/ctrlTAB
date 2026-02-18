@@ -414,13 +414,14 @@ app.put('/api/links/:id', authenticateToken, async (req, res) => {
 
   const { title, url, favicon, sort_order } = req.body;
 
-  // favicon explicitly provided → use it; URL changed and no favicon → re-fetch
-  let newFavicon = favicon ?? null;
-  if (url && favicon === undefined) {
+  // Non-empty favicon string → custom uploaded icon, keep as-is
+  // Empty string or missing → re-fetch for the (new) URL
+  let newFavicon;
+  if (favicon) {
+    newFavicon = favicon;
+  } else {
     const existing = db.prepare('SELECT url FROM links WHERE id = ?').get(req.params.id);
-    if (existing && existing.url !== url) {
-      newFavicon = await fetchFavicon(url);
-    }
+    newFavicon = await fetchFavicon(url || existing?.url);
   }
 
   db.prepare('UPDATE links SET title = COALESCE(?, title), url = COALESCE(?, url), favicon = COALESCE(?, favicon), sort_order = COALESCE(?, sort_order) WHERE id = ?')

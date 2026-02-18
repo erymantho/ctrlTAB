@@ -833,27 +833,49 @@ async function handleDeleteSection(sectionId) {
 // ═══════════════════════════════════════════════════════════════
 
 function faviconFormGroup(currentValue = '') {
+    const hasIcon = !!currentValue;
+    const placeholderSvg = `<svg width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.2"/><path d="M8 1.5C8 1.5 6 4 6 8s2 6.5 2 6.5M8 1.5C8 1.5 10 4 10 8s-2 6.5-2 6.5M1.5 8h13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`;
     return `
         <div class="form-group">
-            <label class="form-label">Custom icon <span style="opacity:0.5;font-weight:400;">(optional)</span></label>
-            <div class="favicon-input-row">
-                <input type="url" class="form-input" name="favicon" id="faviconUrlInput" value="${escapeHtml(currentValue)}" placeholder="Leave empty to detect automatically">
-                <button type="button" class="btn-secondary" onclick="document.getElementById('faviconFileInput').click()">Upload</button>
-                <input type="file" id="faviconFileInput" accept=".png,.svg,.ico" style="display:none" onchange="handleIconUpload(this)">
+            <label class="form-label">Icon <span style="opacity:0.5;font-weight:400;">(optional)</span></label>
+            <input type="hidden" name="favicon" id="faviconHiddenInput" value="${escapeHtml(currentValue)}">
+            <input type="file" id="faviconFileInput" accept=".png,.svg,.ico" style="display:none" onchange="handleIconUpload(this)">
+            <div class="icon-upload-group">
+                <div class="icon-preview-box" id="faviconPreviewBox">
+                    ${hasIcon
+                        ? `<img id="faviconPreviewImg" src="${escapeHtml(currentValue)}" alt="" onerror="this.style.display='none'">`
+                        : `<span id="faviconPreviewImg" class="icon-preview-placeholder">${placeholderSvg}</span>`}
+                </div>
+                <div class="icon-upload-actions">
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('faviconFileInput').click()">Upload icon</button>
+                    <button type="button" class="btn-text-danger" id="faviconRemoveBtn" style="${hasIcon ? '' : 'display:none'}" onclick="removeIcon()">Remove</button>
+                </div>
             </div>
         </div>`;
 }
+
+const _faviconPlaceholderSvg = `<svg width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.2"/><path d="M8 1.5C8 1.5 6 4 6 8s2 6.5 2 6.5M8 1.5C8 1.5 10 4 10 8s-2 6.5-2 6.5M1.5 8h13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`;
 
 async function handleIconUpload(input) {
     const file = input.files[0];
     if (!file) return;
     try {
         const url = await uploadIcon(file);
-        document.getElementById('faviconUrlInput').value = url;
+        document.getElementById('faviconHiddenInput').value = url;
+        const wrap = document.getElementById('faviconPreviewBox');
+        wrap.innerHTML = `<img id="faviconPreviewImg" src="${url}" alt="" onerror="this.style.display='none'">`;
+        document.getElementById('faviconRemoveBtn').style.display = '';
     } catch {
         alert('Failed to upload icon');
     }
     input.value = '';
+}
+
+function removeIcon() {
+    document.getElementById('faviconHiddenInput').value = '';
+    const wrap = document.getElementById('faviconPreviewBox');
+    wrap.innerHTML = `<span id="faviconPreviewImg" class="icon-preview-placeholder">${_faviconPlaceholderSvg}</span>`;
+    document.getElementById('faviconRemoveBtn').style.display = 'none';
 }
 
 function showAddLinkModal(sectionId) {
@@ -881,7 +903,7 @@ async function handleAddLink(event, sectionId) {
     const formData = new FormData(event.target);
     const title = formData.get('title');
     const url = formData.get('url');
-    const favicon = formData.get('favicon') || undefined;
+    const favicon = formData.get('favicon') || undefined; // undefined = let server auto-fetch
 
     try {
         showLoading();
@@ -923,7 +945,7 @@ async function handleEditLink(event, linkId) {
     const formData = new FormData(event.target);
     const title = formData.get('title');
     const url = formData.get('url');
-    const favicon = formData.get('favicon') || undefined;
+    const favicon = formData.get('favicon'); // '' = removed (re-fetch), non-empty = custom icon
 
     try {
         showLoading();
