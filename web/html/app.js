@@ -119,12 +119,20 @@ function setTheme(theme) {
             if (overlay) overlay.classList.remove('active');
         }, 1500);
     } else if (theme === 'batman') {
+        const batIntro = document.getElementById('batman-intro');
+        if (batIntro) {
+            batIntro.style.display = 'block';
+            void batIntro.offsetHeight; // force reflow
+            batIntro.classList.add('active');
+            setTimeout(() => {
+                batIntro.classList.remove('active');
+                batIntro.style.display = 'none';
+            }, 11800);
+        }
         document.body.classList.add('batman-booting');
-        if (overlay) overlay.classList.add('batman-boot');
         setTimeout(() => {
             document.body.classList.remove('batman-booting');
-            if (overlay) overlay.classList.remove('batman-boot');
-        }, 1800);
+        }, 11800);
     } else if (currentTheme === 'cyberpunk') {
         if (overlay) {
             overlay.classList.add('shutdown');
@@ -619,7 +627,7 @@ function showSettings() {
 
     html += `
         <div class="settings-footer">
-            Built by Michael Smith, with ☕ and sudo privileges
+            Built by Michael Smith, with Claude Code
             <div class="settings-version">v0.1</div>
         </div>
     `;

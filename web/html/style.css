@@ -921,8 +921,6 @@ body {
 .settings-footer {
     font-size: 11px;
     color: var(--color-text-muted);
-    letter-spacing: 0.03em;
-    opacity: 0.6;
 }
 
 .settings-version {
