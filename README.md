@@ -102,14 +102,15 @@ ctrlTAB is now available at `http://localhost:8090`. Log in with your admin cred
 - [x] PWA with offline support
 - [x] User accounts and authentication
 - [x] Drag & drop reordering of links and sections
+- [ ] Drag links across collections
+- [ ] Dutch language support
+- [ ] Descriptions for collections, sections, and links
 - [ ] Search across all links
 - [ ] Import/export (JSON, HTML bookmarks)
 - [ ] Tags and filtering
 - [ ] Browser extension for quick saving
 - [ ] Keyboard shortcuts
-- [ ] Drag links across collections
-- [ ] Dutch language support
-- [ ] Descriptions for collections, sections, and links
+
 
 ---
 
