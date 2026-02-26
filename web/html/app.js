@@ -890,7 +890,7 @@ function renderLinks(links, sectionId) {
             const sources = buildFaviconSources(link);
             const initial = escapeHtml((link.title || '?')[0].toUpperCase());
             const faviconHtml = sources.length > 0
-                ? `<img src="${escapeHtml(sources[0])}" data-fallbacks="${escapeHtml(sources.slice(1).join('|'))}" data-initial="${initial}" alt="" onerror="onFaviconError(this)">`
+                ? `<img src="${escapeHtml(sources[0])}" data-fallbacks="${escapeHtml(sources.slice(1).join('|'))}" data-initial="${initial}" alt="" draggable="false" onerror="onFaviconError(this)">`
                 : `<span class="link-favicon-initial">${initial}</span>`;
             return `
             <a href="${escapeHtml(link.url)}"${target} class="link-card" draggable="true" data-link-id="${link.id}">
@@ -926,6 +926,8 @@ function renderLinks(links, sectionId) {
 let _dragLinkId = null;       // ID of the link being dragged
 let _dragLinkCard = null;     // DOM reference to the card (kept during cross-col navigation)
 let _dragSrcSectionId = null; // section the link originated from
+let _dragCardHeight = 0;      // card height at dragstart (for placeholder sizing)
+let _placeholder = null;      // drop-target indicator div that moves instead of the card
 let _dragSection = null;      // section element being dragged
 let _dragCtrl = null;         // AbortController for all drag event listeners
 let _colHoverTimer = null;    // timer for hovering over a collection in the sidebar
@@ -961,6 +963,9 @@ function _startColHover() {
                         _dragLinkCard.style.display = 'none';
                         document.body.appendChild(_dragLinkCard);
                     }
+                    // Placeholder belongs to the old collection's grid — discard it
+                    _placeholder?.remove();
+                    _placeholder = null;
                     selectCollection(colId);
                 }, 800);
             }
@@ -978,7 +983,7 @@ function initDragAndDrop() {
     _dragCtrl = new AbortController();
     const { signal } = _dragCtrl;
 
-    // If a cross-collection drag is in progress, re-attach collection hover for the new collection
+    // Cross-collection drag in progress: re-attach hover listeners for the new collection
     if (_dragLinkId) _startColHover();
 
     // ── Link drag ──────────────────────────────────────────────────────
@@ -989,23 +994,31 @@ function initDragAndDrop() {
             _dragLinkId = parseInt(card.dataset.linkId);
             _dragLinkCard = card;
             _dragSrcSectionId = parseInt(grid.dataset.sectionId);
+            _dragCardHeight = card.offsetHeight;
             card.classList.add('dragging');
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', card.dataset.linkId);
             document.body.classList.add('link-dragging');
+            // Create placeholder — it moves around grids; the card stays put
+            _placeholder = document.createElement('div');
+            _placeholder.className = 'drag-placeholder';
+            _placeholder.style.height = _dragCardHeight + 'px';
             _startColHover();
         }, { signal });
 
         grid.addEventListener('dragover', e => {
             e.preventDefault();
-            if (!_dragLinkId || !_dragLinkCard) return;
-            // Unhide card if it was parked during cross-collection navigation
-            _dragLinkCard.style.display = '';
-            _dragLinkCard.classList.add('dragging');
+            if (!_dragLinkId) return;
+            // After cross-collection navigation the placeholder was discarded; recreate it
+            if (!_placeholder) {
+                _placeholder = document.createElement('div');
+                _placeholder.className = 'drag-placeholder';
+                _placeholder.style.height = (_dragCardHeight || 60) + 'px';
+            }
             grid.querySelector(':scope > p')?.remove();
             const after = getDragAfterElement(grid, e.clientX, e.clientY);
-            if (after) grid.insertBefore(_dragLinkCard, after);
-            else grid.appendChild(_dragLinkCard);
+            if (after && after !== _placeholder) grid.insertBefore(_placeholder, after);
+            else if (!after) grid.appendChild(_placeholder);
         }, { signal });
 
         grid.addEventListener('drop', e => e.preventDefault(), { signal });
@@ -1057,22 +1070,31 @@ function initDragAndDrop() {
         if (!_dragLinkId) return;
 
         const card = _dragLinkCard;
-        const targetGrid = card?.closest('.links-grid');
         const linkId = _dragLinkId;
         const srcSectionId = _dragSrcSectionId;
+
+        // Where is the placeholder? That's the drop target.
+        const targetGrid = _placeholder?.isConnected ? _placeholder.parentElement : null;
+
+        // Move card to placeholder position before removing placeholder
+        if (targetGrid) targetGrid.insertBefore(card, _placeholder);
+        _placeholder?.remove();
+        _placeholder = null;
+
         _dragLinkId = null;
         _dragLinkCard = null;
         _dragSrcSectionId = null;
-
-        if (!targetGrid) {
-            // Dropped outside any grid (e.g. Escape, or cancelled) — restore state
-            card?.remove();
-            loadDashboard(currentCollectionId);
-            return;
-        }
+        _dragCardHeight = 0;
 
         card.classList.remove('dragging');
         card.style.display = '';
+
+        if (!targetGrid || !targetGrid.classList.contains('links-grid')) {
+            // Drag was cancelled or dropped outside any grid
+            if (!card.isConnected) card.remove(); // was parked on body
+            else loadDashboard(currentCollectionId);
+            return;
+        }
 
         const targetSectionId = parseInt(targetGrid.dataset.sectionId);
         const orderedIds = [...targetGrid.querySelectorAll('.link-card[data-link-id]')]
@@ -1084,7 +1106,7 @@ function initDragAndDrop() {
                     method: 'PUT',
                     body: JSON.stringify({ section_id: targetSectionId }),
                 });
-                // Restore placeholder in the now-empty source section (if still visible)
+                // Restore "No links yet" in source section if it's now empty
                 const srcGrid = document.querySelector(`.links-grid[data-section-id="${srcSectionId}"]`);
                 if (srcGrid && !srcGrid.querySelector('.link-card[data-link-id]')) {
                     srcGrid.innerHTML = LINKS_EMPTY_HTML;

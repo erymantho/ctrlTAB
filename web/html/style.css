@@ -438,6 +438,14 @@ html.has-user-bg.has-user-bg-dim[data-theme="batman"] .grid-background {
     outline-offset: 2px;
 }
 
+.drag-placeholder {
+    border: 2px dashed var(--color-accent);
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--color-accent) 6%, transparent);
+    box-sizing: border-box;
+    min-height: 56px;
+}
+
 /* Drop-zones: andere collection-knoppen oplichten tijdens link-drag */
 .link-dragging .collections-list button[data-collection-id] {
     border: 1px dashed var(--color-accent);
