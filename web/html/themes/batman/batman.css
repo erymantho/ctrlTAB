@@ -421,7 +421,6 @@
 #batman-intro .bi-thunder,
 #batman-intro .bi-lightning,
 #batman-intro .bi-signal,
-#batman-intro .bi-stamp,
 #batman-intro .bi-flash,
 #batman-intro .bi-vignette {
     position: absolute;
@@ -522,50 +521,11 @@
     100%{ opacity: 0.5;   }
 }
 
-/* ── BATMAN STAMP: Batman slams onto screen ── */
-#batman-intro .bi-stamp {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    animation: biStampIn 1.05s cubic-bezier(0.05, 0.85, 0.2, 1) 6.5s forwards;
-}
-
-#batman-intro .bi-stamp-img {
-    width: clamp(360px, 84vw, 1040px);
-    height: auto;
-    display: block;
-    filter:
-        drop-shadow(0 0 28px rgba(245,197,24,1))
-        drop-shadow(0 0 65px rgba(245,197,24,.75))
-        drop-shadow(0 0 130px rgba(245,197,24,.35));
-    animation: biStampShake 0.42s ease 7.1s;
-}
-
-@keyframes biStampIn {
-    0%  { opacity: 0; transform: scale(4.5) perspective(900px) rotateX(25deg); filter: blur(28px); }
-    10% { opacity: 0.9; }
-    55% { transform: scale(1.04) perspective(900px) rotateX(-1deg); filter: blur(1px); }
-    75% { transform: scale(0.97); filter: blur(0); }
-    100%{ opacity: 1;  transform: scale(1); filter: blur(0); }
-}
-
-@keyframes biStampShake {
-    0%  { transform: translate(0,    0);    }
-    14% { transform: translate(-7px, 5px);  }
-    28% { transform: translate(7px, -6px);  }
-    43% { transform: translate(-5px, 7px);  }
-    57% { transform: translate(6px, -4px);  }
-    71% { transform: translate(-4px, 4px);  }
-    86% { transform: translate(3px, -3px);  }
-    100%{ transform: translate(0,    0);    }
-}
-
-/* ── YELLOW FLASH: Concept C — hard gele klap ── */
+/* ── YELLOW FLASH: hard gele klap ── */
 #batman-intro .bi-flash {
     opacity: 0;
     background: #f5c518;
-    animation: biFlash 0.45s ease 9.5s;
+    animation: biFlash 0.45s ease 7.2s;
 }
 
 @keyframes biFlash {
@@ -580,9 +540,9 @@
     pointer-events: none;
 }
 
-/* Whole intro fades out (9.8–11.6s) */
+/* Whole intro fades out (7.5–9.3s) */
 #batman-intro.active {
-    animation: biIntroFade 1.8s ease 9.8s forwards;
+    animation: biIntroFade 1.8s ease 7.5s forwards;
 }
 
 @keyframes biIntroFade {
@@ -603,11 +563,11 @@
 
 /* App container hidden during intro, fades in after flash */
 .batman-booting .app-container {
-    animation: batmanContainerBoot 11.8s ease forwards;
+    animation: batmanContainerBoot 9.5s ease forwards;
 }
 
 @keyframes batmanContainerBoot {
-    0%,  80% { opacity: 0; }
-    94%       { opacity: 1; }
+    0%,  72% { opacity: 0; }
+    88%       { opacity: 1; }
     100%      { opacity: 1; }
 }
