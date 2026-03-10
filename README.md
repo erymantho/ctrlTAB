@@ -17,8 +17,10 @@ A lightweight, self-hosted bookmark and link manager to organize your links into
 - 📑 **Sections** — Organize links within collections under named headings
 - 🔗 **Links** — Store URLs with auto-fetched favicons (including local/private network apps)
 - 🖼️ **Custom Icons** — Upload your own PNG, SVG, or ICO as a link icon
-- 🎨 **Themes** — Light, Dark, Cyberpunk, and Batman
+- 🎨 **Themes** — Light, Dark, OLED, Cyberpunk, and Batman
 - 🎨 **Accent Color** — Per-user accent color with preset palette and custom color picker
+- 🖼️ **Custom Background** — Upload a personal background image, works across all themes
+- 🔍 **Search** — Global search across all links and collections
 - ↕️ **Drag & Drop** — Reorder links and sections by dragging; reset to A-Z with one click
 - 👤 **User Accounts** — Multi-user with admin panel and JWT authentication
 - 🐳 **Docker-ready** — Runs as a two-container stack (API + Nginx)
@@ -103,9 +105,11 @@ ctrlTAB is now available at `http://localhost:8090`. Log in with your admin cred
 - [x] User accounts and authentication
 - [x] Drag & drop reordering of links and sections
 - [x] Drag links across sections and collections
+- [x] Custom background image per user
+- [x] Show/hide URL in link cards (user preference)
+- [x] Global search across all links and collections
 - [ ] Dutch language support
 - [ ] Descriptions for collections, sections, and links
-- [ ] Search across all links
 - [ ] Import/export (JSON, HTML bookmarks)
 - [ ] Tags and filtering
 - [ ] Browser extension for quick saving

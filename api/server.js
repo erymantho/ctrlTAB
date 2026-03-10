@@ -591,6 +591,30 @@ app.get('/api/dashboard/:collectionId', authenticateToken, (req, res) => {
   });
 });
 
+// ─── Search ───────────────────────────────────────────────────────
+app.get('/api/search', authenticateToken, (req, res) => {
+  const q = (req.query.q || '').trim();
+  if (q.length < 2) return res.json([]);
+
+  const pattern = `%${q}%`;
+  const results = db.prepare(`
+    SELECT
+      l.id, l.title, l.url, l.favicon, l.section_id,
+      s.name  AS section_name,
+      c.id    AS collection_id,
+      c.name  AS collection_name
+    FROM links l
+    JOIN sections s ON l.section_id = s.id
+    JOIN collections c ON s.collection_id = c.id
+    WHERE c.user_id = ?
+      AND (l.title LIKE ? COLLATE NOCASE OR l.url LIKE ? COLLATE NOCASE)
+    ORDER BY c.sort_order, c.id, s.sort_order, s.id, l.sort_order, l.id
+    LIMIT 200
+  `).all(req.user.id, pattern, pattern);
+
+  res.json(results);
+});
+
 // ─── Health check ─────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

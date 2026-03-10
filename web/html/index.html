@@ -51,6 +51,22 @@
             </div>
 
             <div class="collections-container">
+                <div class="search-wrapper">
+                    <input
+                        type="search"
+                        id="searchInput"
+                        class="search-input"
+                        placeholder="Search links..."
+                        autocomplete="off"
+                        oninput="handleSearchInput(this.value)"
+                        onkeydown="if(event.key==='Enter') openFirstSearchResult()"
+                    >
+                    <button class="search-clear-btn" id="searchClearBtn" style="display:none;" onclick="clearSearch()" title="Clear search" aria-label="Clear search">
+                        <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                            <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
                 <div class="collections-header">
                     <span class="label">Collections</span>
                     <button class="btn-icon" id="addCollectionBtn" title="Add collection">

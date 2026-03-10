@@ -197,6 +197,8 @@ let _accentColor = null;
 let _backgroundImage = null;
 let _backgroundDim = true;
 let _showLinkUrls = false;
+let _searchQuery = '';
+let _searchDebounceTimer = null;
 const ACCENT_PRESETS = ['#e2003d', '#e8650a', '#d4a017', '#198754', '#0d6efd', '#6f42c1', '#d63384'];
 initTheme();
 _accentColor = localStorage.getItem('ctrltab-accent') || null;
@@ -278,6 +280,8 @@ const elements = {
     modalBackdrop: document.getElementById('modalBackdrop'),
     loadingOverlay: document.getElementById('loadingOverlay'),
     settingsBackBtn: document.getElementById('settingsBackBtn'),
+    searchInput:     document.getElementById('searchInput'),
+    searchClearBtn:  document.getElementById('searchClearBtn'),
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -491,6 +495,11 @@ function goHome() {
 }
 
 async function selectCollection(id) {
+    _searchQuery = '';
+    clearTimeout(_searchDebounceTimer);
+    if (elements.searchInput) elements.searchInput.value = '';
+    if (elements.searchClearBtn) elements.searchClearBtn.style.display = 'none';
+
     elements.sectionsContainer.classList.add('sections-exit');
     currentView = 'collections';
     currentCollectionId = id;
@@ -953,6 +962,113 @@ function renderLinks(links, sectionId) {
         `;
         })
         .join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Search
+// ═══════════════════════════════════════════════════════════════
+
+function handleSearchInput(value) {
+    _searchQuery = value.trim();
+
+    if (elements.searchClearBtn) {
+        elements.searchClearBtn.style.display = _searchQuery ? '' : 'none';
+    }
+
+    clearTimeout(_searchDebounceTimer);
+
+    if (_searchQuery.length < 2) {
+        if (_searchQuery.length === 0) clearSearch();
+        return;
+    }
+
+    _searchDebounceTimer = setTimeout(() => performSearch(_searchQuery), 300);
+}
+
+async function performSearch(q) {
+    try {
+        const results = await apiRequest(`/search?q=${encodeURIComponent(q)}`);
+        if (_searchQuery !== q) return;
+        renderSearchResults(q, results);
+    } catch (err) {
+        console.error('Search failed:', err);
+    }
+}
+
+function renderSearchResults(q, results) {
+    currentView = 'search';
+    renderCollections();
+
+    elements.collectionTitle.textContent = `Search: "${q}"`;
+    elements.editCollectionBtn.style.display = 'none';
+    elements.addSectionBtn.style.display = 'none';
+    elements.settingsBackBtn.style.display = 'none';
+
+    if (results.length === 0) {
+        elements.sectionsContainer.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">🔍</div>
+                <p>No results for "<strong>${escapeHtml(q)}</strong>"</p>
+            </div>
+        `;
+        return;
+    }
+
+    const target = getOpenInNewTab() ? ' target="_blank"' : '';
+    const cards = results.map(link => {
+        const sources = buildFaviconSources(link);
+        const initial = escapeHtml((link.title || '?')[0].toUpperCase());
+        let displayUrl = link.url;
+        try { displayUrl = new URL(link.url).hostname.replace(/^www\./, ''); } catch {}
+        const faviconHtml = sources.length > 0
+            ? `<img src="${escapeHtml(sources[0])}" data-fallbacks="${escapeHtml(sources.slice(1).join('|'))}" data-initial="${initial}" alt="" draggable="false" onerror="onFaviconError(this)">`
+            : `<span class="link-favicon-initial">${initial}</span>`;
+
+        return `
+            <a href="${escapeHtml(link.url)}"${target} class="link-card search-result-card"
+               draggable="false"
+               data-link-id="${link.id}"
+               onclick="selectCollection(${link.collection_id}); clearSearch();">
+                <div class="link-favicon">${faviconHtml}</div>
+                <div class="link-content">
+                    <div class="link-title">${escapeHtml(link.title)}</div>
+                    <div class="link-url">${escapeHtml(displayUrl)}</div>
+                    <div class="search-breadcrumb">${escapeHtml(link.collection_name)} &rsaquo; ${escapeHtml(link.section_name)}</div>
+                </div>
+            </a>
+        `;
+    }).join('');
+
+    elements.sectionsContainer.innerHTML = `
+        <div class="search-results-container">
+            <p class="search-results-count">${results.length} result${results.length === 1 ? '' : 's'}</p>
+            <div class="links-grid">${cards}</div>
+        </div>
+    `;
+}
+
+function clearSearch() {
+    _searchQuery = '';
+    clearTimeout(_searchDebounceTimer);
+
+    if (elements.searchInput) elements.searchInput.value = '';
+    if (elements.searchClearBtn) elements.searchClearBtn.style.display = 'none';
+
+    if (currentView === 'search') {
+        const lastId = parseInt(localStorage.getItem('ctrltab-last-collection'));
+        const target = (lastId && collections.find(c => c.id === lastId)) || collections[0];
+        if (target) {
+            selectCollection(target.id);
+        } else {
+            currentView = 'collections';
+            renderCollections();
+        }
+    }
+}
+
+function openFirstSearchResult() {
+    const first = elements.sectionsContainer.querySelector('.search-result-card');
+    if (first) first.click();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1857,10 +1973,22 @@ elements.settingsBackBtn.addEventListener('click', () => {
     }
 });
 
-// Close modal on Escape key
+// Close modal on Escape key, search shortcuts
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && elements.modal.classList.contains('active')) {
         hideModal();
+        return;
+    }
+    if (e.key === 'Escape' && currentView === 'search') {
+        clearSearch();
+        return;
+    }
+    if (e.key === '/' && !elements.modal.classList.contains('active')) {
+        const tag = document.activeElement?.tagName;
+        if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
+            e.preventDefault();
+            elements.searchInput?.focus();
+        }
     }
 });
 

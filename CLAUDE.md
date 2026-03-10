@@ -103,6 +103,7 @@ All routes except `/api/auth/login` and `/api/health` require a JWT Bearer token
 | Method | Route | Description |
 |--------|-------|-------------|
 | GET | `/api/dashboard/:collectionId` | All-in-one: collection + sections + links |
+| GET | `/api/search?q=...` | Search links by title/URL across all user's collections (min 2 chars, max 200 results) |
 | POST | `/api/upload/icon` | Custom link icon (PNG/SVG/ICO, max 2 MB) |
 | POST | `/api/upload/background` | Background image (JPG/PNG/GIF, max 5 MB) |
 | GET | `/api/uploads/:filename` | Serve uploaded files |
@@ -115,10 +116,13 @@ All routes except `/api/auth/login` and `/api/health` require a JWT Bearer token
 ### Global state variables
 ```js
 let currentCollectionId = null;    // active collection
-let currentView = 'dashboard';     // 'dashboard' | 'settings'
+let currentView = 'dashboard';     // 'dashboard' | 'settings' | 'search'
 let _accentColor = null;           // user accent color
 let _backgroundImage = null;       // user background URL
 let _backgroundDim = true;         // dim overlay toggle
+let _showLinkUrls = false;         // show URL under link title
+let _searchQuery = '';             // current search query
+let _searchDebounceTimer = null;   // debounce timer for search input
 
 // Drag & Drop state
 let _dragLinkId, _dragLinkCard, _dragSrcSectionId;
@@ -138,8 +142,15 @@ let _colHoverTimer, _colHoverCtrl;
 | `setTheme(theme)` | Saves to localStorage + triggers boot animations |
 | `applyAccentColor(color)` | Sets `--color-accent` CSS variable on `:root` |
 | `applyBackgroundImage(url)` | Sets `--user-bg` + class `has-user-bg` on `<html>` |
+| `applyShowLinkUrls(show)` | Toggles class `show-link-urls` on `<html>` |
+| `toggleShowLinkUrls(checked)` | Saves preference to localStorage + calls `applyShowLinkUrls` |
 | `loadUserPreferences()` | Fetches prefs from API, caches in localStorage |
 | `apiRequest(path, options)` | Fetch wrapper with JWT Authorization header |
+| `handleSearchInput(value)` | Debounced input handler — shows/hides clear button, calls `performSearch` |
+| `performSearch(q)` | Calls `GET /api/search?q=...` with stale-request guard |
+| `renderSearchResults(q, results)` | Sets `currentView='search'`, renders link cards with breadcrumbs |
+| `clearSearch()` | Resets search state, navigates back to last collection |
+| `openFirstSearchResult()` | Clicks the first `.search-result-card` in the results |
 
 ### Favicon fallback chain
 When loading a link favicon, multiple sources are tried in order:
@@ -225,3 +236,5 @@ Admin credentials are checked and updated on every startup if env vars have chan
 - **Service worker** uses network-first for static assets, network-only for `/api/`
 - **Ownership checks** in the API: every route verifies the logged-in user owns the collection/section/link via helper functions `ownsCollection`, `ownsSection`, `ownsLink`
 - **`sort_order`** is used for ordering; reorder endpoints save the new order as integer indices
+- **Keyboard shortcuts:** `/` focuses the search input (when no input/modal is active), `Escape` clears search when `currentView === 'search'`
+- **Search:** sidebar search bar above the collections header; `Enter` in the search input opens the first result; clicking a collection always clears the search state
