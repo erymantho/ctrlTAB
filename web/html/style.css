@@ -461,6 +461,18 @@ html.has-user-bg.has-user-bg-dim[data-theme="batman"] .grid-background {
     margin-bottom: var(--spacing-2xl);
 }
 
+/* Two-column section layout (niet voor settings) */
+html.two-col-layout .sections-container:not(:has(> .settings-section)) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    gap: var(--spacing-2xl);
+}
+
+html.two-col-layout .sections-container:not(:has(> .settings-section)) .section {
+    margin-bottom: 0;
+}
+
 .section-header {
     display: flex;
     align-items: center;

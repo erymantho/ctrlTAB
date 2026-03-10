@@ -86,6 +86,16 @@ function toggleShowLinkUrls(checked) {
     applyShowLinkUrls(checked);
 }
 
+function applyTwoColLayout(enabled) {
+    document.documentElement.classList.toggle('two-col-layout', !!enabled);
+}
+
+function toggleTwoColLayout(checked) {
+    _twoColLayout = checked;
+    localStorage.setItem('ctrltab-two-col', checked ? '1' : '0');
+    applyTwoColLayout(checked);
+}
+
 function updateAccentPreview(color) {
     applyAccentColor(color);
     const customBtn = document.querySelector('.accent-preset-custom');
@@ -197,6 +207,7 @@ let _accentColor = null;
 let _backgroundImage = null;
 let _backgroundDim = true;
 let _showLinkUrls = false;
+let _twoColLayout = false;
 let _searchQuery = '';
 let _searchDebounceTimer = null;
 const ACCENT_PRESETS = ['#e2003d', '#e8650a', '#d4a017', '#198754', '#0d6efd', '#6f42c1', '#d63384'];
@@ -205,6 +216,8 @@ _accentColor = localStorage.getItem('ctrltab-accent') || null;
 applyAccentColor(_accentColor);
 _showLinkUrls = localStorage.getItem('ctrltab-show-url') !== '0';
 applyShowLinkUrls(_showLinkUrls);
+_twoColLayout = localStorage.getItem('ctrltab-two-col') === '1';
+applyTwoColLayout(_twoColLayout);
 
 // ═══════════════════════════════════════════════════════════════
 // Authentication
@@ -680,6 +693,13 @@ function showSettings() {
                     <span class="toggle-track"></span>
                 </label>
                 <span>Show URL in link cards</span>
+            </div>
+            <div class="toggle-label">
+                <label class="toggle-switch">
+                    <input type="checkbox" ${_twoColLayout ? 'checked' : ''} onchange="toggleTwoColLayout(this.checked)">
+                    <span class="toggle-track"></span>
+                </label>
+                <span>Two-column section layout</span>
             </div>
         </div>
     `;

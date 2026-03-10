@@ -21,6 +21,7 @@ A lightweight, self-hosted bookmark and link manager to organize your links into
 - 🎨 **Accent Color** — Per-user accent color with preset palette and custom color picker
 - 🖼️ **Custom Background** — Upload a personal background image, works across all themes
 - 🔍 **Search** — Global search across all links and collections
+- ⬜ **Two-column layout** — Optional two-column section layout per user preference
 - ↕️ **Drag & Drop** — Reorder links and sections by dragging; reset to A-Z with one click
 - 👤 **User Accounts** — Multi-user with admin panel and JWT authentication
 - 🐳 **Docker-ready** — Runs as a two-container stack (API + Nginx)
@@ -107,6 +108,7 @@ ctrlTAB is now available at `http://localhost:8090`. Log in with your admin cred
 - [x] Drag links across sections and collections
 - [x] Custom background image per user
 - [x] Show/hide URL in link cards (user preference)
+- [x] Two-column section layout (user preference)
 - [x] Global search across all links and collections
 - [ ] Dutch language support
 - [ ] Descriptions for collections, sections, and links

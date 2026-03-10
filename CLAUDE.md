@@ -122,6 +122,7 @@ let _accentColor = null;           // user accent color
 let _backgroundImage = null;       // user background URL
 let _backgroundDim = true;         // dim overlay toggle
 let _showLinkUrls = false;         // show URL under link title
+let _twoColLayout = false;         // two-column section layout
 let _searchQuery = '';             // current search query
 let _searchDebounceTimer = null;   // debounce timer for search input
 
@@ -145,6 +146,8 @@ let _colHoverTimer, _colHoverCtrl;
 | `applyBackgroundImage(url)` | Sets `--user-bg` + class `has-user-bg` on `<html>` |
 | `applyShowLinkUrls(show)` | Toggles class `show-link-urls` on `<html>` |
 | `toggleShowLinkUrls(checked)` | Saves preference to localStorage + calls `applyShowLinkUrls` |
+| `applyTwoColLayout(enabled)` | Toggles class `two-col-layout` on `<html>` |
+| `toggleTwoColLayout(checked)` | Saves preference to localStorage + calls `applyTwoColLayout` |
 | `loadUserPreferences()` | Fetches prefs from API, caches in localStorage |
 | `apiRequest(path, options)` | Fetch wrapper with JWT Authorization header |
 | `handleSearchInput(value)` | Debounced input handler — shows/hides clear button, calls `performSearch` |
