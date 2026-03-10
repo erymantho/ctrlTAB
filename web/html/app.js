@@ -323,6 +323,11 @@ async function apiRequest(endpoint, options = {}) {
             throw new Error(error.error || 'Request failed');
         }
 
+        // Invalidate search cache on any mutation
+        if (options.method && options.method !== 'GET') {
+            if (typeof invalidateSearchCache === 'function') invalidateSearchCache();
+        }
+
         return await response.json();
     } catch (error) {
         console.error('API Error:', error);
@@ -715,6 +720,25 @@ function showSettings() {
             </div>
         `;
     }
+
+    // Import / Export section
+    html += `
+        <div class="settings-section">
+            <h3 class="settings-section-title">Import / Export</h3>
+            <p style="font-size:13px;color:var(--color-text-muted);margin-bottom:12px;">
+                Import bookmarks from your browser or from Linkwarden.
+            </p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn-secondary" onclick="openImportModal()" style="display:inline-flex;align-items:center;gap:6px;">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                        <path d="M8 2v8M5 7l3 3 3-3M2 12v1.5A1.5 1.5 0 003.5 15h9a1.5 1.5 0 001.5-1.5V12"
+                          stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Import Links
+                </button>
+            </div>
+        </div>
+    `;
 
     // Account section
     html += `
@@ -2024,6 +2048,661 @@ async function handleDeleteUser(userId) {
 // ═══════════════════════════════════════════════════════════════
 // Utility Functions
 // ═══════════════════════════════════════════════════════════════
+// Search – Full-page search with filters, sort & relevance scoring
+// ═══════════════════════════════════════════════════════════════
+
+let _searchCache = null;
+let _searchCacheTime = 0;
+const SEARCH_CACHE_TTL = 30000;
+let _searchQuery = '';
+let _searchFilterCollection = 'all';
+let _searchSortBy = 'relevance';
+let _isSearchView = false;
+
+function initSearch() {
+    const input = document.getElementById('globalSearch');
+    const clearBtn = document.getElementById('searchClear');
+    if (!input || !clearBtn) return;
+
+    let debounceTimer = null;
+
+    input.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        const q = input.value.trim();
+        if (q.length === 0) {
+            if (_isSearchView) exitSearchView();
+            return;
+        }
+        debounceTimer = setTimeout(() => {
+            _searchQuery = q;
+            enterSearchView();
+        }, 250);
+    });
+
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            input.value = '';
+            if (_isSearchView) exitSearchView();
+            input.blur();
+        }
+        if (e.key === 'Enter') {
+            clearTimeout(debounceTimer);
+            _searchQuery = input.value.trim();
+            if (_searchQuery.length > 0) enterSearchView();
+        }
+    });
+
+    clearBtn.addEventListener('click', () => {
+        input.value = '';
+        if (_isSearchView) exitSearchView();
+        input.focus();
+    });
+
+    // Ctrl+K shortcut
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            input.focus();
+            input.select();
+        }
+    });
+}
+
+function enterSearchView() {
+    _isSearchView = true;
+    document.querySelectorAll('.collection-item button').forEach(b => b.classList.remove('active'));
+
+    elements.editCollectionBtn.style.display = 'none';
+    elements.addSectionBtn.style.display = 'none';
+    elements.settingsBackBtn.style.display = 'none';
+    elements.collectionTitle.textContent = 'Search Results';
+
+    performSearch();
+}
+
+function exitSearchView() {
+    _isSearchView = false;
+    _searchQuery = '';
+    _searchFilterCollection = 'all';
+
+    const lastId = parseInt(localStorage.getItem('ctrltab-last-collection'));
+    if (lastId) {
+        selectCollection(lastId);
+    } else if (collections.length > 0) {
+        selectCollection(collections[0].id);
+    }
+}
+
+async function fetchAllLinksForSearch() {
+    const now = Date.now();
+    if (_searchCache && (now - _searchCacheTime) < SEARCH_CACHE_TTL) return _searchCache;
+
+    const token = localStorage.getItem('ctrltab-token');
+    if (!token) return [];
+
+    try {
+        const cols = await apiRequest('/collections');
+        const allLinks = [];
+
+        const dashboards = await Promise.all(
+            cols.map(col =>
+                apiRequest('/dashboard/' + col.id).catch(() => null)
+            )
+        );
+
+        cols.forEach((col, i) => {
+            const dashboard = dashboards[i];
+            if (!dashboard) return;
+            for (const section of (dashboard.sections || [])) {
+                for (const link of (section.links || [])) {
+                    allLinks.push({
+                        collectionId: col.id,
+                        collectionName: col.name,
+                        sectionName: section.name,
+                        title: link.title,
+                        url: link.url,
+                        favicon: link.favicon || null,
+                    });
+                }
+            }
+        });
+
+        _searchCache = allLinks;
+        _searchCacheTime = now;
+        return allLinks;
+    } catch {
+        return [];
+    }
+}
+
+function invalidateSearchCache() {
+    _searchCache = null;
+}
+
+function scoreSearchLink(link, words) {
+    let score = 0;
+    const titleLow = link.title.toLowerCase();
+    const urlLow = link.url.toLowerCase();
+    const colLow = link.collectionName.toLowerCase();
+    const secLow = link.sectionName.toLowerCase();
+
+    for (const w of words) {
+        if (titleLow.includes(w)) {
+            score += 10;
+            if (titleLow.startsWith(w)) score += 5;
+        }
+        if (urlLow.includes(w)) score += 4;
+        if (colLow.includes(w)) score += 2;
+        if (secLow.includes(w)) score += 2;
+    }
+    return score;
+}
+
+async function performSearch() {
+    const container = elements.sectionsContainer;
+    if (!container) return;
+
+    container.innerHTML = '<div class="search-loading"><span>Searching...</span></div>';
+
+    const allLinks = await fetchAllLinksForSearch();
+    const words = _searchQuery.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+    if (words.length === 0) { container.innerHTML = ''; return; }
+
+    let matched = [];
+    for (const link of allLinks) {
+        const score = scoreSearchLink(link, words);
+        if (score > 0) matched.push({ ...link, _score: score });
+    }
+
+    if (_searchFilterCollection !== 'all') {
+        const fid = parseInt(_searchFilterCollection);
+        matched = matched.filter(l => l.collectionId === fid);
+    }
+
+    if (_searchSortBy === 'relevance') {
+        matched.sort((a, b) => b._score - a._score);
+    } else if (_searchSortBy === 'name-asc') {
+        matched.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (_searchSortBy === 'name-desc') {
+        matched.sort((a, b) => b.title.localeCompare(a.title));
+    } else if (_searchSortBy === 'collection') {
+        matched.sort((a, b) => a.collectionName.localeCompare(b.collectionName) || a.title.localeCompare(b.title));
+    }
+
+    const collectionsInResults = {};
+    for (const l of allLinks) {
+        if (scoreSearchLink(l, words) > 0) collectionsInResults[l.collectionId] = l.collectionName;
+    }
+
+    renderSearchView(matched, Object.entries(collectionsInResults), words);
+}
+
+function renderSearchView(results, collectionFilters, words) {
+    const container = elements.sectionsContainer;
+    if (!container) return;
+
+    let html = '<div class="search-view-header">'
+        + '<div class="search-view-title">'
+        + '<svg width="18" height="18" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> '
+        + 'Search Results '
+        + '<span class="search-view-count">' + results.length + ' link' + (results.length !== 1 ? 's' : '') + ' found</span>'
+        + '</div></div>';
+
+    html += '<div class="search-filters">';
+    html += '<span style="font-size:11px;color:var(--color-text-muted);font-weight:500;">Filter:</span>';
+    html += '<span class="search-filter-tag' + (_searchFilterCollection === 'all' ? ' active' : '') + '" onclick="searchSetFilter(\'all\')">All</span>';
+    for (const [id, name] of collectionFilters) {
+        html += '<span class="search-filter-tag' + (_searchFilterCollection === String(id) ? ' active' : '') + '" onclick="searchSetFilter(\'' + id + '\')">' + escapeHtml(name) + '</span>';
+    }
+    html += '<select class="search-filter-select" onchange="searchSetSort(this.value)" style="margin-left:auto">'
+        + '<option value="relevance"' + (_searchSortBy === 'relevance' ? ' selected' : '') + '>Relevance</option>'
+        + '<option value="name-asc"' + (_searchSortBy === 'name-asc' ? ' selected' : '') + '>Name A-Z</option>'
+        + '<option value="name-desc"' + (_searchSortBy === 'name-desc' ? ' selected' : '') + '>Name Z-A</option>'
+        + '<option value="collection"' + (_searchSortBy === 'collection' ? ' selected' : '') + '>Collection</option>'
+        + '</select>';
+    html += '</div>';
+
+    if (results.length === 0) {
+        html += '<div class="search-empty">'
+            + '<div class="search-empty-icon">\uD83D\uDD0D</div>'
+            + '<div class="search-empty-text">No links found for "' + escapeHtml(_searchQuery) + '"</div>'
+            + '<div class="search-empty-hint">Try different search terms or remove filters</div>'
+            + '</div>';
+    } else {
+        const openInNewTab = getOpenInNewTab();
+        const target = openInNewTab ? ' target="_blank" rel="noopener"' : '';
+
+        html += '<div class="search-results-grid">';
+        for (const link of results.slice(0, 100)) {
+            const initial = (link.title || '?')[0].toUpperCase();
+            const faviconHtml = link.favicon
+                ? '<img src="' + escapeHtml(link.favicon) + '" alt="" onerror="this.parentElement.textContent=\'' + escapeHtml(initial) + '\'">'
+                : escapeHtml(initial);
+
+            let domain = '';
+            try { domain = new URL(link.url).hostname; } catch {}
+
+            html += '<a class="search-card" href="' + escapeHtml(link.url) + '"' + target + '>'
+                + '<div class="search-card-body"><div class="search-card-top">'
+                + '<div class="search-card-favicon">' + faviconHtml + '</div>'
+                + '<div class="search-card-content">'
+                + '<div class="search-card-title">' + highlightSearchWords(link.title, words) + '</div>'
+                + '<div class="search-card-url">' + escapeHtml(domain) + '</div>'
+                + '</div></div></div>'
+                + '<div class="search-card-footer"><div class="search-card-meta">'
+                + '<span class="search-card-badge search-card-badge-collection">\uD83D\uDCC1 ' + escapeHtml(link.collectionName) + '</span>'
+                + '<span class="search-card-badge search-card-badge-section">\uD83D\uDCD1 ' + escapeHtml(link.sectionName) + '</span>'
+                + '</div>'
+                + '<button class="search-card-action" onclick="event.preventDefault();event.stopPropagation();searchGoToCollection(' + link.collectionId + ')" title="Go to collection">'
+                + '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+                + '</button></div></a>';
+        }
+        html += '</div>';
+
+        if (results.length > 100) {
+            html += '<div style="text-align:center;padding:16px;color:var(--color-text-muted);font-size:12px;">'
+                + results.length + ' results \u2014 showing first 100. Refine your search for better results.</div>';
+        }
+    }
+
+    container.innerHTML = html;
+}
+
+function highlightSearchWords(text, words) {
+    let escaped = escapeHtml(text);
+    for (const w of words) {
+        const re = new RegExp('(' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+        escaped = escaped.replace(re, '<mark class="search-hl">$1</mark>');
+    }
+    return escaped;
+}
+
+function searchSetFilter(val) {
+    _searchFilterCollection = val;
+    performSearch();
+}
+
+function searchSetSort(val) {
+    _searchSortBy = val;
+    performSearch();
+}
+
+function searchGoToCollection(collectionId) {
+    const input = document.getElementById('globalSearch');
+    if (input) input.value = '';
+    _isSearchView = false;
+    _searchQuery = '';
+    _searchFilterCollection = 'all';
+    selectCollection(collectionId);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Import – Browser Bookmarks & Linkwarden JSON
+// ═══════════════════════════════════════════════════════════════
+
+let _importSource = null;
+let _importParsedData = null;
+
+function openImportModal() {
+    _importSource = null;
+    _importParsedData = null;
+    showImportSourceSelection();
+    document.getElementById('importOverlay').classList.add('active');
+}
+
+function closeImportModal() {
+    document.getElementById('importOverlay').classList.remove('active');
+}
+
+function showImportSourceSelection() {
+    const body = document.getElementById('importModalBody');
+    document.getElementById('importModalTitle').textContent = 'Import Links';
+    body.innerHTML = `
+        <div class="import-sources">
+            <div class="import-source-card" onclick="selectImportSource('browser', this)">
+                <div class="import-source-icon">\uD83C\uDF10</div>
+                <div class="import-source-title">Browser Bookmarks</div>
+                <div class="import-source-desc">HTML file from Chrome, Firefox, Edge or Safari</div>
+            </div>
+            <div class="import-source-card" onclick="selectImportSource('linkwarden', this)">
+                <div class="import-source-icon">\uD83D\uDD17</div>
+                <div class="import-source-title">Linkwarden</div>
+                <div class="import-source-desc">JSON export from Linkwarden</div>
+            </div>
+        </div>
+        <div class="import-actions">
+            <button class="btn-secondary" onclick="closeImportModal()">Cancel</button>
+        </div>
+    `;
+}
+
+function selectImportSource(source, el) {
+    _importSource = source;
+    document.querySelectorAll('.import-source-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    setTimeout(() => showImportFileUpload(), 200);
+}
+
+function showImportFileUpload() {
+    const body = document.getElementById('importModalBody');
+    const accept = _importSource === 'browser' ? '.html,.htm' : '.json';
+    const hint = _importSource === 'browser'
+        ? 'Export your bookmarks as HTML from your browser (Chrome: Bookmark Manager \u2192 \u22EE \u2192 Export)'
+        : 'Export your links as JSON from Linkwarden (Settings \u2192 Data \u2192 Export)';
+
+    document.getElementById('importModalTitle').textContent =
+        _importSource === 'browser' ? 'Import Browser Bookmarks' : 'Import from Linkwarden';
+
+    body.innerHTML = `
+        <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 16px;">${hint}</p>
+        <div class="import-dropzone" id="importDropzone" onclick="document.getElementById('importFileInput').click()">
+            <div class="import-dropzone-icon">\uD83D\uDCC2</div>
+            <div class="import-dropzone-text">
+                <strong>Click here</strong> or drag and drop your file
+            </div>
+            <input type="file" id="importFileInput" accept="${accept}">
+        </div>
+        <div id="importPreviewArea"></div>
+        <div class="import-actions">
+            <button class="btn-secondary" onclick="showImportSourceSelection()">Back</button>
+            <button class="btn-primary" id="importStartBtn" disabled onclick="startImport()">Import</button>
+        </div>
+    `;
+
+    const dropzone = document.getElementById('importDropzone');
+    const fileInput = document.getElementById('importFileInput');
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files[0]) handleImportFile(e.target.files[0]);
+    });
+
+    dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+    });
+    dropzone.addEventListener('dragleave', () => {
+        dropzone.classList.remove('dragover');
+    });
+    dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+        if (e.dataTransfer.files[0]) handleImportFile(e.dataTransfer.files[0]);
+    });
+}
+
+function handleImportFile(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            if (_importSource === 'browser') {
+                _importParsedData = parseBrowserBookmarks(e.target.result);
+            } else {
+                _importParsedData = parseLinkwardenExport(e.target.result);
+            }
+            showImportPreview();
+        } catch (err) {
+            alert('Could not read file: ' + err.message);
+        }
+    };
+    reader.readAsText(file);
+}
+
+function parseBrowserBookmarks(html) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const folders = [];
+
+    function processNode(dl, folderName) {
+        const links = [];
+        if (!dl) return;
+        const items = dl.children;
+        for (let i = 0; i < items.length; i++) {
+            const dt = items[i];
+            if (dt.tagName !== 'DT') continue;
+            const h3 = dt.querySelector(':scope > H3');
+            const a = dt.querySelector(':scope > A');
+            const subDl = dt.querySelector(':scope > DL');
+            if (h3 && subDl) {
+                processNode(subDl, h3.textContent.trim());
+            } else if (a && a.href) {
+                const url = a.getAttribute('HREF') || a.href;
+                if (url && url.startsWith('http')) {
+                    links.push({ title: a.textContent.trim() || url, url: url });
+                }
+            }
+        }
+        if (links.length > 0) folders.push({ name: folderName || 'Bookmarks', links: links });
+    }
+
+    const rootDl = doc.querySelector('DL');
+    if (rootDl) {
+        const items = rootDl.children;
+        let rootLinks = [];
+        for (let i = 0; i < items.length; i++) {
+            const dt = items[i];
+            if (dt.tagName !== 'DT') continue;
+            const h3 = dt.querySelector(':scope > H3');
+            const a = dt.querySelector(':scope > A');
+            const subDl = dt.querySelector(':scope > DL');
+            if (h3 && subDl) {
+                processNode(subDl, h3.textContent.trim());
+            } else if (a) {
+                const url = a.getAttribute('HREF') || a.href;
+                if (url && url.startsWith('http')) {
+                    rootLinks.push({ title: a.textContent.trim() || url, url: url });
+                }
+            }
+        }
+        if (rootLinks.length > 0) folders.push({ name: 'Bookmarks', links: rootLinks });
+    }
+
+    if (folders.length === 0) throw new Error('No bookmarks found in this file');
+    return { folders };
+}
+
+function parseLinkwardenExport(json) {
+    const data = JSON.parse(json);
+    const folders = [];
+
+    if (Array.isArray(data)) {
+        const byCollection = {};
+        for (const item of data) {
+            const colName = (item.collection && item.collection.name) || 'Linkwarden';
+            if (!byCollection[colName]) byCollection[colName] = [];
+            byCollection[colName].push({
+                title: item.name || item.title || item.url || 'Untitled',
+                url: item.url || item.link || '',
+            });
+        }
+        for (const [name, links] of Object.entries(byCollection)) {
+            if (links.length > 0) folders.push({ name, links });
+        }
+    } else if (data.collections && Array.isArray(data.collections)) {
+        for (const col of data.collections) {
+            const links = (col.links || []).map(l => ({
+                title: l.name || l.title || l.url || 'Untitled',
+                url: l.url || l.link || '',
+            })).filter(l => l.url);
+            if (links.length > 0) folders.push({ name: col.name || 'Linkwarden', links });
+        }
+    } else if (data.links && Array.isArray(data.links)) {
+        const links = data.links.map(l => ({
+            title: l.name || l.title || l.url || 'Untitled',
+            url: l.url || l.link || '',
+        })).filter(l => l.url);
+        if (links.length > 0) folders.push({ name: 'Linkwarden', links });
+    } else {
+        throw new Error('Unknown Linkwarden export format');
+    }
+
+    if (folders.length === 0) throw new Error('No links found in this file');
+    return { folders };
+}
+
+async function showImportPreview() {
+    const area = document.getElementById('importPreviewArea');
+    if (!_importParsedData || _importParsedData.folders.length === 0) {
+        area.innerHTML = '<div class="import-preview">No data found</div>';
+        return;
+    }
+
+    let totalLinks = 0;
+    let html = '<div class="import-preview">';
+    for (const folder of _importParsedData.folders) {
+        html += '<div class="import-preview-folder">\uD83D\uDCC1 ' + escapeHtml(folder.name)
+            + ' <span style="font-weight:400;color:var(--color-text-muted)">(' + folder.links.length + ' links)</span></div>';
+        for (const link of folder.links.slice(0, 5)) {
+            html += '<div class="import-preview-link">\uD83D\uDD17 ' + escapeHtml(link.title) + '</div>';
+        }
+        if (folder.links.length > 5) {
+            html += '<div class="import-preview-link" style="opacity:0.5">\u2026 and ' + (folder.links.length - 5) + ' more</div>';
+        }
+        totalLinks += folder.links.length;
+    }
+    html += '</div>';
+    html += '<div class="import-preview-count">'
+        + _importParsedData.folders.length + ' folders, ' + totalLinks + ' links found</div>';
+
+    html += `
+        <div class="import-option">
+            <label>Import as:</label>
+            <select id="importMode">
+                <option value="new-collection">Create new collection(s)</option>
+                <option value="existing">Into existing collection</option>
+            </select>
+        </div>
+        <div id="existingCollectionSelect" style="display:none">
+            <div class="import-option">
+                <label>Collection:</label>
+                <select id="importTargetCollection"></select>
+            </div>
+        </div>
+    `;
+
+    area.innerHTML = html;
+    document.getElementById('importStartBtn').disabled = false;
+
+    document.getElementById('importMode').addEventListener('change', async function() {
+        const div = document.getElementById('existingCollectionSelect');
+        if (this.value === 'existing') {
+            div.style.display = 'block';
+            const sel = document.getElementById('importTargetCollection');
+            if (sel.options.length <= 0) {
+                try {
+                    const cols = await apiRequest('/collections');
+                    sel.innerHTML = cols.map(c => '<option value="' + c.id + '">' + escapeHtml(c.name) + '</option>').join('');
+                } catch {}
+            }
+        } else {
+            div.style.display = 'none';
+        }
+    });
+}
+
+async function startImport() {
+    if (!_importParsedData) return;
+
+    const mode = document.getElementById('importMode').value;
+    const body = document.getElementById('importModalBody');
+
+    body.innerHTML = `
+        <div class="import-progress active">
+            <div class="import-progress-bar">
+                <div class="import-progress-fill" id="importProgressFill"></div>
+            </div>
+            <div class="import-progress-text" id="importProgressText">Preparing...</div>
+        </div>
+    `;
+
+    const fill = document.getElementById('importProgressFill');
+    const text = document.getElementById('importProgressText');
+
+    let importedLinks = 0;
+    let failedLinks = 0;
+    let totalLinks = _importParsedData.folders.reduce((s, f) => s + f.links.length, 0);
+    let processed = 0;
+
+    try {
+        for (const folder of _importParsedData.folders) {
+            let collectionId;
+
+            if (mode === 'existing') {
+                collectionId = parseInt(document.getElementById('importTargetCollection').value);
+            } else {
+                text.textContent = 'Creating collection: ' + folder.name + '...';
+                try {
+                    const col = await apiRequest('/collections', { method: 'POST', body: JSON.stringify({ name: folder.name }) });
+                    collectionId = col.id;
+                } catch {
+                    failedLinks += folder.links.length;
+                    continue;
+                }
+            }
+
+            text.textContent = 'Creating section: ' + folder.name + '...';
+            let section;
+            try {
+                section = await apiRequest('/collections/' + collectionId + '/sections', { method: 'POST', body: JSON.stringify({ name: folder.name }) });
+            } catch {
+                failedLinks += folder.links.length;
+                continue;
+            }
+
+            for (const link of folder.links) {
+                try {
+                    await apiRequest('/sections/' + section.id + '/links', { method: 'POST', body: JSON.stringify({ title: link.title, url: link.url }) });
+                    importedLinks++;
+                } catch {
+                    failedLinks++;
+                }
+                processed++;
+                const pct = Math.round((processed / totalLinks) * 100);
+                fill.style.width = pct + '%';
+                text.textContent = processed + ' / ' + totalLinks + ' links processed...';
+            }
+        }
+
+        invalidateSearchCache();
+
+        const icon = failedLinks === 0 ? '\u2705' : '\u26A0\uFE0F';
+        body.innerHTML = `
+            <div class="import-result">
+                <div class="import-result-icon">${icon}</div>
+                <div class="import-result-text">${importedLinks} links imported</div>
+                ${failedLinks > 0 ? '<div class="import-result-detail">' + failedLinks + ' links could not be imported</div>' : ''}
+                <div style="margin-top: 16px">
+                    <button class="btn-primary" onclick="closeImportModal(); loadCollections();">Close</button>
+                </div>
+            </div>
+        `;
+    } catch (err) {
+        body.innerHTML = `
+            <div class="import-result">
+                <div class="import-result-icon">\u274C</div>
+                <div class="import-result-text">Import failed</div>
+                <div class="import-result-detail">${escapeHtml(err.message)}</div>
+                <div style="margin-top: 16px">
+                    <button class="btn-secondary" onclick="closeImportModal()">Close</button>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Close import modal on Escape
+document.addEventListener('keydown', (e) => {
+    const overlay = document.getElementById('importOverlay');
+    if (e.key === 'Escape' && overlay && overlay.classList.contains('active')) {
+        closeImportModal();
+    }
+});
+
+// Close import modal on backdrop click
+document.getElementById('importOverlay')?.addEventListener('click', (e) => {
+    if (e.target.id === 'importOverlay') closeImportModal();
+});
+
+// ═══════════════════════════════════════════════════════════════
 
 function escapeHtml(text) {
     const div = document.createElement('div');
@@ -2086,4 +2765,5 @@ if ('serviceWorker' in navigator) {
 
     loadUserPreferences();
     loadCollections();
+    initSearch();
 })();
