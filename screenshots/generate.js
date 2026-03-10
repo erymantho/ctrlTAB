@@ -3,8 +3,8 @@ const path = require('path');
 
 const THEMES = [
     { html: 'light-theme.html', out: 'light-theme.png' },
+    { html: 'dark-theme.html',  out: 'dark-theme.png' },
     // Voeg hier later toe:
-    // { html: 'dark-theme.html',  out: 'dark-theme.png' },
     // { html: 'cyberpunk.html',   out: 'cyberpunk.png' },
     // { html: 'batman.html',      out: 'batman.png' },
 ];
