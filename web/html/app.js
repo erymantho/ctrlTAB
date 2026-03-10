@@ -76,6 +76,16 @@ function applyBackgroundDim(dim) {
     document.documentElement.classList.toggle('has-user-bg-dim', !!dim);
 }
 
+function applyShowLinkUrls(show) {
+    document.documentElement.classList.toggle('show-link-urls', !!show);
+}
+
+function toggleShowLinkUrls(checked) {
+    _showLinkUrls = checked;
+    localStorage.setItem('ctrltab-show-url', checked ? '1' : '0');
+    applyShowLinkUrls(checked);
+}
+
 function updateAccentPreview(color) {
     applyAccentColor(color);
     const customBtn = document.querySelector('.accent-preset-custom');
@@ -186,10 +196,13 @@ function setOpenInNewTab(enabled) {
 let _accentColor = null;
 let _backgroundImage = null;
 let _backgroundDim = true;
+let _showLinkUrls = false;
 const ACCENT_PRESETS = ['#e2003d', '#e8650a', '#d4a017', '#198754', '#0d6efd', '#6f42c1', '#d63384'];
 initTheme();
 _accentColor = localStorage.getItem('ctrltab-accent') || null;
 applyAccentColor(_accentColor);
+_showLinkUrls = localStorage.getItem('ctrltab-show-url') !== '0';
+applyShowLinkUrls(_showLinkUrls);
 
 // ═══════════════════════════════════════════════════════════════
 // Authentication
@@ -652,6 +665,13 @@ function showSettings() {
                 </label>
                 <span>Open links in new tab</span>
             </div>
+            <div class="toggle-label">
+                <label class="toggle-switch">
+                    <input type="checkbox" ${_showLinkUrls ? 'checked' : ''} onchange="toggleShowLinkUrls(this.checked)">
+                    <span class="toggle-track"></span>
+                </label>
+                <span>Show URL in link cards</span>
+            </div>
         </div>
     `;
 
@@ -902,6 +922,8 @@ function renderLinks(links, sectionId) {
         .map(link => {
             const sources = buildFaviconSources(link);
             const initial = escapeHtml((link.title || '?')[0].toUpperCase());
+            let displayUrl = link.url;
+            try { displayUrl = new URL(link.url).hostname.replace(/^www\./, ''); } catch {}
             const faviconHtml = sources.length > 0
                 ? `<img src="${escapeHtml(sources[0])}" data-fallbacks="${escapeHtml(sources.slice(1).join('|'))}" data-initial="${initial}" alt="" draggable="false" onerror="onFaviconError(this)">`
                 : `<span class="link-favicon-initial">${initial}</span>`;
@@ -912,6 +934,7 @@ function renderLinks(links, sectionId) {
                 </div>
                 <div class="link-content">
                     <div class="link-title">${escapeHtml(link.title)}</div>
+                    <div class="link-url">${escapeHtml(displayUrl)}</div>
                 </div>
                 <div class="link-actions" onclick="event.preventDefault(); event.stopPropagation();">
                     <button class="btn-icon" onclick="showEditLinkModal(${link.id}, ${link.section_id}, '${escapeHtml(link.title)}', '${escapeHtml(link.url)}', '${escapeHtml(link.favicon || '')}')" title="Edit link">

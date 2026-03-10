@@ -1,0 +1,10 @@
+{
+  "name": "ctrltab-screenshots",
+  "version": "1.0.0",
+  "scripts": {
+    "generate": "node generate.js"
+  },
+  "dependencies": {
+    "playwright": "^1.40.0"
+  }
+}

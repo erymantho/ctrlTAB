@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ctrlTAB — Light Theme Preview</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #d8dce3;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 40px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        /* ── Outer showcase ──────────────────────────────────── */
+        .showcase-label {
+            margin-top: 20px;
+            font-size: 11.5px;
+            color: #9ca3af;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        /* ── App shell ───────────────────────────────────────── */
+        .app {
+            width: 1200px;
+            height: 750px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            box-shadow:
+                0 0 0 1px rgba(0,0,0,0.06),
+                0 4px 12px rgba(0,0,0,0.08),
+                0 16px 40px rgba(0,0,0,0.12),
+                0 40px 80px rgba(0,0,0,0.10);
+        }
+
+        /* ── Sidebar ─────────────────────────────────────────── */
+        .sidebar {
+            width: 224px;
+            flex-shrink: 0;
+            background: #ffffff;
+            border-right: 1px solid #e9ecef;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .sidebar-header {
+            padding: 32px 20px 26px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .logo {
+            display: flex;
+            align-items: baseline;
+            line-height: 1;
+        }
+        .logo-ctrl {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 14px;
+            font-weight: 400;
+            color: #212529;
+        }
+        .logo-tab {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 14px;
+            font-weight: 400;
+            color: #e2003d;
+        }
+        .logo-subtitle {
+            font-size: 12px;
+            color: #adb5bd;
+            margin-top: 6px;
+            font-family: 'SFMono-Regular', Menlo, Consolas, monospace;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        .collections-wrap {
+            flex: 1;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .col-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .col-label {
+            font-size: 13px;
+            color: #adb5bd;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+        }
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #868e96;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        .col-item {
+            width: 100%;
+            padding: 8px 12px;
+            font-size: 13.5px;
+            color: #495057;
+            border-radius: 6px;
+            margin-bottom: 2px;
+            cursor: default;
+        }
+        .col-item.active {
+            background: #e2003d;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .sidebar-footer {
+            padding: 14px 12px;
+            border-top: 1px solid #e9ecef;
+        }
+        .settings-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #868e96;
+            width: 100%;
+            cursor: default;
+        }
+
+        /* ── Main ────────────────────────────────────────────── */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 28px;
+            border-bottom: 1px solid #e9ecef;
+            background: #f8f9fa;
+        }
+        .collection-title {
+            font-size: 19px;
+            font-weight: 600;
+            color: #212529;
+            letter-spacing: -0.025em;
+        }
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: #e2003d;
+            color: #fff;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: default;
+            letter-spacing: -0.01em;
+        }
+
+        /* ── Sections area ───────────────────────────────────── */
+        .sections-area {
+            flex: 1;
+            padding: 26px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            overflow: hidden;
+        }
+
+        .section-block {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #adb5bd;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .section-edit {
+            color: #dee2e6;
+        }
+
+        /* ── Link grid ───────────────────────────────────────── */
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .link-card {
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 13px 14px;
+            display: flex;
+            align-items: flex-start;
+            gap: 11px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 2px 6px rgba(0,0,0,0.03);
+        }
+
+        .favicon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+            margin-top: 1px;
+            letter-spacing: -0.02em;
+        }
+
+        .link-info { flex: 1; min-width: 0; }
+
+        .link-title {
+            font-size: 14px;
+            font-weight: 400;
+            color: #212529;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .link-url {
+            font-size: 10.5px;
+            color: #adb5bd;
+            font-family: 'SFMono-Regular', Menlo, Consolas, monospace;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app">
+
+    <!-- ─── Sidebar ──────────────────────────────────────────── -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span class="logo-ctrl">ctrl</span><span class="logo-tab">TAB</span>
+            </div>
+            <div class="logo-subtitle">Link Manager</div>
+        </div>
+
+        <div class="collections-wrap">
+            <div class="col-header">
+                <span class="col-label">Collections</span>
+                <div class="icon-btn">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                        <path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="col-item active">Development</div>
+            <div class="col-item">Design</div>
+            <div class="col-item">Reading</div>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="settings-btn">
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+                    <path d="M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M13.05 10.13a1.14 1.14 0 0 0 .23 1.26l.04.04a1.38 1.38 0 1 1-1.96 1.96l-.04-.04a1.14 1.14 0 0 0-1.26-.23 1.14 1.14 0 0 0-.69 1.05v.11a1.38 1.38 0 1 1-2.76 0v-.06a1.14 1.14 0 0 0-.75-1.05 1.14 1.14 0 0 0-1.26.23l-.04.04a1.38 1.38 0 1 1-1.96-1.96l.04-.04a1.14 1.14 0 0 0 .23-1.26 1.14 1.14 0 0 0-1.05-.69h-.11a1.38 1.38 0 1 1 0-2.76h.06a1.14 1.14 0 0 0 1.05-.75 1.14 1.14 0 0 0-.23-1.26l-.04-.04a1.38 1.38 0 1 1 1.96-1.96l.04.04a1.14 1.14 0 0 0 1.26.23h.06a1.14 1.14 0 0 0 .69-1.05v-.11a1.38 1.38 0 1 1 2.76 0v.06a1.14 1.14 0 0 0 .69 1.05 1.14 1.14 0 0 0 1.26-.23l.04-.04a1.38 1.38 0 1 1 1.96 1.96l-.04.04a1.14 1.14 0 0 0-.23 1.26v.06a1.14 1.14 0 0 0 1.05.69h.11a1.38 1.38 0 1 1 0 2.76h-.06a1.14 1.14 0 0 0-1.05.69Z" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                Settings
+            </div>
+        </div>
+    </aside>
+
+    <!-- ─── Main content ─────────────────────────────────────── -->
+    <main class="main">
+        <div class="content-header">
+            <h2 class="collection-title">Development</h2>
+            <div class="btn-primary">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                    <path d="M6.5 1.5v10M1.5 6.5h10" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+                Add Section
+            </div>
+        </div>
+
+        <div class="sections-area">
+
+            <!-- Section: Tools -->
+            <div class="section-block">
+                <div class="section-header">
+                    <span class="section-title">Tools</span>
+                    <svg class="section-edit" width="12" height="12" viewBox="0 0 16 16" fill="none">
+                        <path d="M11.333 2A1.886 1.886 0 0 1 14 4.667l-9 9-3.667 1 1-3.667 9-9Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="links-grid">
+                    <div class="link-card">
+                        <div class="favicon" style="background:#24292e;">G</div>
+                        <div class="link-info">
+                            <div class="link-title">GitHub</div>
+                            <div class="link-url">github.com</div>
+                        </div>
+                    </div>
+                    <div class="link-card">
+                        <div class="favicon" style="background:#000;">▲</div>
+                        <div class="link-info">
+                            <div class="link-title">Vercel</div>
+                            <div class="link-url">vercel.com</div>
+                        </div>
+                    </div>
+                    <div class="link-card">
+                        <div class="favicon" style="background:#5e6ad2;">L</div>
+                        <div class="link-info">
+                            <div class="link-title">Linear</div>
+                            <div class="link-url">linear.app</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Resources -->
+            <div class="section-block">
+                <div class="section-header">
+                    <span class="section-title">Resources</span>
+                    <svg class="section-edit" width="12" height="12" viewBox="0 0 16 16" fill="none">
+                        <path d="M11.333 2A1.886 1.886 0 0 1 14 4.667l-9 9-3.667 1 1-3.667 9-9Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="links-grid">
+                    <div class="link-card">
+                        <div class="favicon" style="background:#f24e1e;">F</div>
+                        <div class="link-info">
+                            <div class="link-title">Figma</div>
+                            <div class="link-url">figma.com</div>
+                        </div>
+                    </div>
+                    <div class="link-card">
+                        <div class="favicon" style="background:#1a1a1a;">N</div>
+                        <div class="link-info">
+                            <div class="link-title">Notion</div>
+                            <div class="link-url">notion.so</div>
+                        </div>
+                    </div>
+                    <div class="link-card">
+                        <div class="favicon" style="background:#007acc; font-size:9px;">VS</div>
+                        <div class="link-info">
+                            <div class="link-title">VS Code</div>
+                            <div class="link-url">code.visualstudio.com</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+</div>
+
+<div class="showcase-label">Light Theme — ctrlTAB</div>
+
+</body>
+</html>
