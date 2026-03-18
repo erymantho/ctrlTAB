@@ -1210,7 +1210,7 @@ function showImportModal() {
 
         <div id="importModalStatus" class="import-status" style="display:none; margin-top: var(--spacing-md);"></div>
 
-        <div class="modal-actions">
+        <div class="form-actions" style="margin-top: var(--spacing-xl);">
             <button type="button" class="btn-secondary" onclick="hideModal()">${t('btn.cancel')}</button>
             <button type="button" class="btn-primary" id="importModalSubmitBtn" disabled onclick="handleImportSubmit()">${t('btn.import')}</button>
         </div>
