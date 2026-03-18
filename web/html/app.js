@@ -779,29 +779,11 @@ function showSettings() {
             </button>
             <div id="exportStatus" class="import-status" style="display:none;"></div>
 
-            <div class="settings-label" style="margin-top: var(--spacing-xl);">${t('import.ctrltab_title')}</div>
-            <div class="settings-hint">${t('import.ctrltab_hint')}</div>
-            <label class="btn-secondary import-label" id="importCtrlTabLabel" style="margin-top: var(--spacing-sm); display: inline-flex;">
-                ${t('btn.choose_file')}
-                <input type="file" accept=".json,application/json" style="display:none" onchange="handleCtrlTabImport(this)">
-            </label>
-            <div id="importCtrlTabStatus" class="import-status" style="display:none;"></div>
-
-            <div class="settings-label" style="margin-top: var(--spacing-xl);">${t('import.linkwarden_title')}</div>
-            <div class="settings-hint">${t('import.linkwarden_hint')}</div>
-            <label class="btn-secondary import-label" id="importLinkwardenLabel" style="margin-top: var(--spacing-sm); display: inline-flex;">
-                ${t('btn.choose_file')}
-                <input type="file" accept=".json,application/json" style="display:none" onchange="handleLinkwardenImport(this)">
-            </label>
-            <div id="importStatus" class="import-status" style="display:none;"></div>
-
-            <div class="settings-label" style="margin-top: var(--spacing-xl);">${t('import.bookmarks_title')}</div>
-            <div class="settings-hint">${t('import.bookmarks_hint')}</div>
-            <label class="btn-secondary import-label" id="importBookmarksLabel" style="margin-top: var(--spacing-sm); display: inline-flex;">
-                ${t('btn.choose_file')}
-                <input type="file" accept=".html,.htm,text/html" style="display:none" onchange="handleBookmarksImport(this)">
-            </label>
-            <div id="importBookmarksStatus" class="import-status" style="display:none;"></div>
+            <div class="settings-label" style="margin-top: var(--spacing-xl);">${t('import.section_title')}</div>
+            <div class="settings-hint">${t('import.section_hint')}</div>
+            <button class="btn-secondary" style="margin-top: var(--spacing-sm);" onclick="showImportModal()">
+                ${t('btn.import_data')}
+            </button>
         </div>
     `;
 
@@ -1191,18 +1173,80 @@ async function handleExport(btn) {
     }
 }
 
-async function _runImport(endpoint, file, labelId, statusId, reloadSidebar) {
-    const statusEl = document.getElementById(statusId);
-    const labelEl  = document.getElementById(labelId);
+function showImportModal() {
+    showModal(t('modal.import_data'), `
+        <div class="import-options">
+            <label class="import-option">
+                <input type="radio" name="importType" value="ctrltab" checked onchange="updateImportModalType()">
+                <div>
+                    <span class="import-option-title">${t('import.ctrltab_title')}</span>
+                    <span class="import-option-hint">${t('import.ctrltab_hint')}</span>
+                </div>
+            </label>
+            <label class="import-option">
+                <input type="radio" name="importType" value="linkwarden" onchange="updateImportModalType()">
+                <div>
+                    <span class="import-option-title">${t('import.linkwarden_title')}</span>
+                    <span class="import-option-hint">${t('import.linkwarden_hint')}</span>
+                </div>
+            </label>
+            <label class="import-option">
+                <input type="radio" name="importType" value="bookmarks" onchange="updateImportModalType()">
+                <div>
+                    <span class="import-option-title">${t('import.bookmarks_title')}</span>
+                    <span class="import-option-hint">${t('import.bookmarks_hint')}</span>
+                </div>
+            </label>
+        </div>
+
+        <div style="margin-top: var(--spacing-lg); display: flex; align-items: center; gap: var(--spacing-md);">
+            <label class="btn-secondary import-label" id="importModalLabel">
+                ${t('btn.choose_file')}
+                <input type="file" id="importModalFile" accept=".json,application/json" style="display:none"
+                    onchange="document.getElementById('importModalFileName').textContent = this.files[0]?.name ?? ''; document.getElementById('importModalSubmitBtn').disabled = !this.files[0];">
+            </label>
+            <span id="importModalFileName" style="font-size: 13px; color: var(--color-text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px;"></span>
+        </div>
+
+        <div id="importModalStatus" class="import-status" style="display:none; margin-top: var(--spacing-md);"></div>
+
+        <div class="modal-actions">
+            <button type="button" class="btn-secondary" onclick="hideModal()">${t('btn.cancel')}</button>
+            <button type="button" class="btn-primary" id="importModalSubmitBtn" disabled onclick="handleImportSubmit()">${t('btn.import')}</button>
+        </div>
+    `);
+}
+
+function updateImportModalType() {
+    const type = document.querySelector('input[name="importType"]:checked')?.value;
+    const fileInput = document.getElementById('importModalFile');
+    fileInput.accept = type === 'bookmarks' ? '.html,.htm,text/html' : '.json,application/json';
+    fileInput.value = '';
+    document.getElementById('importModalFileName').textContent = '';
+    document.getElementById('importModalSubmitBtn').disabled = true;
+}
+
+async function handleImportSubmit() {
+    const type = document.querySelector('input[name="importType"]:checked')?.value;
+    const fileInput = document.getElementById('importModalFile');
+    const file = fileInput.files[0];
+    if (!file || !type) return;
+
+    const endpoints = { ctrltab: '/import/ctrltab', linkwarden: '/import/linkwarden', bookmarks: '/import/bookmarks' };
+    const statusEl  = document.getElementById('importModalStatus');
+    const submitBtn = document.getElementById('importModalSubmitBtn');
+    const labelEl   = document.getElementById('importModalLabel');
+
     statusEl.style.display = '';
     statusEl.className = 'import-status import-status--loading';
     statusEl.textContent = t('import.importing');
+    submitBtn.disabled = true;
     labelEl.style.pointerEvents = 'none';
 
     try {
         const formData = new FormData();
         formData.append('file', file);
-        const res = await fetch(`${API_BASE}${endpoint}`, {
+        const res = await fetch(`${API_BASE}${endpoints[type]}`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${getAuthToken()}` },
             body: formData,
@@ -1218,34 +1262,14 @@ async function _runImport(endpoint, file, labelId, statusId, reloadSidebar) {
             links: imported.links,
             l_plural: imported.links !== 1 ? 's' : ''
         });
-        if (reloadSidebar) await loadCollections();
+        await loadCollections();
+        setTimeout(hideModal, 2000);
     } catch (err) {
         statusEl.className = 'import-status import-status--error';
         statusEl.textContent = err.message || t('import.failed');
-    } finally {
+        submitBtn.disabled = false;
         labelEl.style.pointerEvents = '';
     }
-}
-
-async function handleCtrlTabImport(input) {
-    const file = input.files[0];
-    input.value = '';
-    if (!file) return;
-    await _runImport('/import/ctrltab', file, 'importCtrlTabLabel', 'importCtrlTabStatus', true);
-}
-
-async function handleBookmarksImport(input) {
-    const file = input.files[0];
-    input.value = '';
-    if (!file) return;
-    await _runImport('/import/bookmarks', file, 'importBookmarksLabel', 'importBookmarksStatus', true);
-}
-
-async function handleLinkwardenImport(input) {
-    const file = input.files[0];
-    input.value = '';
-    if (!file) return;
-    await _runImport('/import/linkwarden', file, 'importLinkwardenLabel', 'importStatus', true);
 }
 
 // ═══════════════════════════════════════════════════════════════

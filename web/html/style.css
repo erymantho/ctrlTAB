@@ -351,6 +351,49 @@ html.has-user-bg.has-user-bg-dim[data-theme="batman"] .grid-background {
     background: rgba(239, 68, 68, 0.08);
 }
 
+.import-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.import-option {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    border: 1px solid var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: border-color var(--transition-fast);
+}
+
+.import-option:has(input:checked) {
+    border-color: var(--color-accent);
+}
+
+.import-option input[type="radio"] {
+    margin-top: 2px;
+    accent-color: var(--color-accent);
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.import-option-title {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+.import-option-hint {
+    display: block;
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin-top: 2px;
+    line-height: 1.5;
+}
+
 .lang-switcher {
     display: flex;
     gap: var(--spacing-xs);

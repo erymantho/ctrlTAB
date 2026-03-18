@@ -148,6 +148,11 @@ const TRANSLATIONS = {
     'export.failed':                     'Export failed.',
 
     // ── Settings — data / import ────────────────────────────────
+    'import.section_title':              'Import data',
+    'import.section_hint':               'Import collections from a backup or another service.',
+    'btn.import_data':                   'Import data\u2026',
+    'modal.import_data':                 'Import data',
+    'btn.import':                        'Import',
     'import.ctrltab_title':              'Import ctrlTAB backup',
     'import.ctrltab_hint':               'Restore collections from a previously exported ctrlTAB JSON backup.',
     'import.linkwarden_title':           'Import from Linkwarden',
@@ -327,6 +332,11 @@ const TRANSLATIONS = {
     'export.failed':                     'Exporteren mislukt.',
 
     // ── Instellingen — gegevens / import ─────────────────────────
+    'import.section_title':              'Gegevens importeren',
+    'import.section_hint':               'Importeer collecties vanuit een back-up of een andere dienst.',
+    'btn.import_data':                   'Gegevens importeren\u2026',
+    'modal.import_data':                 'Gegevens importeren',
+    'btn.import':                        'Importeren',
     'import.ctrltab_title':              'ctrlTAB back-up importeren',
     'import.ctrltab_hint':               'Herstel collecties vanuit een eerder ge\u00ebxporteerde ctrlTAB JSON-back-up.',
     'import.linkwarden_title':           'Importeren uit Linkwarden',
@@ -506,6 +516,11 @@ const TRANSLATIONS = {
     'export.failed':                     'Error al exportar.',
 
     // ── Configuraci\u00f3n — datos / importar ──────────────────────────
+    'import.section_title':              'Importar datos',
+    'import.section_hint':               'Importa colecciones desde un respaldo u otro servicio.',
+    'btn.import_data':                   'Importar datos\u2026',
+    'modal.import_data':                 'Importar datos',
+    'btn.import':                        'Importar',
     'import.ctrltab_title':              'Importar respaldo ctrlTAB',
     'import.ctrltab_hint':               'Restaura colecciones desde un respaldo JSON de ctrlTAB exportado previamente.',
     'import.linkwarden_title':           'Importar desde Linkwarden',
