@@ -13,7 +13,8 @@ CtrlTab/
 │   └── Dockerfile
 ├── web/
 │   ├── html/         Vanilla JS frontend (no framework, no build step)
-│   │   ├── app.js         All frontend logic (~1600 lines)
+│   │   ├── app.js         All frontend logic (~1800 lines)
+│   │   ├── i18n.js        Translations (EN/NL/ES) + t() helper
 │   │   ├── style.css      Main stylesheet + light/dark theme variables
 │   │   ├── index.html     App shell + inline flash-prevention script
 │   │   ├── login.html     Login page
@@ -104,7 +105,10 @@ All routes except `/api/auth/login` and `/api/health` require a JWT Bearer token
 |--------|-------|-------------|
 | GET | `/api/dashboard/:collectionId` | All-in-one: collection + sections + links |
 | GET | `/api/search?q=...` | Search links by title/URL across all user's collections (min 2 chars, max 200 results) |
+| GET | `/api/export` | Export all user's collections/sections/links as JSON backup (internal favicon URLs stripped) |
+| POST | `/api/import/ctrltab` | Restore from ctrlTAB JSON backup (`multipart/form-data`, field `file`, max 10 MB) |
 | POST | `/api/import/linkwarden` | Import Linkwarden JSON export (`multipart/form-data`, field `file`, max 10 MB) |
+| POST | `/api/import/bookmarks` | Import Netscape HTML bookmarks (`multipart/form-data`, field `file`, max 10 MB) |
 | POST | `/api/upload/icon` | Custom link icon (PNG/SVG/ICO, max 2 MB) |
 | POST | `/api/upload/background` | Background image (JPG/PNG/GIF, max 5 MB) |
 | GET | `/api/uploads/:filename` | Serve uploaded files |
@@ -125,6 +129,7 @@ let _showLinkUrls = false;         // show URL under link title
 let _twoColLayout = false;         // two-column section layout
 let _searchQuery = '';             // current search query
 let _searchDebounceTimer = null;   // debounce timer for search input
+let _lang = 'en';                  // active language (set by i18n.js detectLang())
 
 // Drag & Drop state
 let _dragLinkId, _dragLinkCard, _dragSrcSectionId;
@@ -155,7 +160,12 @@ let _colHoverTimer, _colHoverCtrl;
 | `renderSearchResults(q, results)` | Sets `currentView='search'`, renders link cards with breadcrumbs |
 | `clearSearch()` | Resets search state, navigates back to last collection |
 | `openFirstSearchResult()` | Clicks the first `.search-result-card` in the results |
-| `handleLinkwardenImport(input)` | Reads a Linkwarden JSON file, POSTs to `/api/import/linkwarden`, shows inline status, reloads sidebar |
+| `applyTranslations()` | Walks DOM applying `data-i18n` / `data-i18n-placeholder` / `data-i18n-title` attributes |
+| `setLanguage(lang)` | Saves lang to localStorage, updates `_lang`, calls `applyTranslations()`, re-renders settings |
+| `handleExport(btn)` | Fetches `GET /api/export`, triggers JSON file download |
+| `showImportModal()` | Opens modal with 3 radio options (ctrlTAB / Linkwarden / Bookmarks), file chooser, status |
+| `updateImportModalType()` | Switches `accept` attribute on file input when radio changes |
+| `handleImportSubmit()` | Reads selected radio, POSTs file to correct endpoint, shows status, auto-closes on success |
 
 ### Favicon fallback chain
 When loading a link favicon, multiple sources are tried in order:
@@ -243,4 +253,9 @@ Admin credentials are checked and updated on every startup if env vars have chan
 - **`sort_order`** is used for ordering; reorder endpoints save the new order as integer indices
 - **Keyboard shortcuts:** `/` focuses the search input (when no input/modal is active), `Escape` clears search when `currentView === 'search'`
 - **Search:** sidebar search bar above the collections header; `Enter` in the search input opens the first result; clicking a collection always clears the search state
+- **i18n:** `i18n.js` defines `TRANSLATIONS` (EN/NL/ES), `t(key, vars)` with `{var}` interpolation, `detectLang()` (localStorage → `navigator.language` → fallback `en`). `applyTranslations()` walks `data-i18n*` attributes. Language persisted as `ctrltab-lang` in localStorage.
+- **Flash prevention conflict:** inline `<script>` in `index.html`/`login.html` uses `var th` (not `var t`) to avoid shadowing the global `t()` translation function.
 - **Linkwarden import:** mapping is Linkwarden collection → ctrlTAB collection + one section named "Links"; sub-collections (parentID != null) are treated as top-level collections; tags are ignored; entire import runs in a single SQLite transaction
+- **ctrlTAB backup import:** validates `{ version: '1.0', collections: [...] }` structure; runs in a single SQLite transaction; internal `/api/uploads/` favicon URLs are stripped on both export and import
+- **Browser bookmarks import:** `parseNetscapeBookmarks()` is a line-by-line regex parser with `<DL>` depth counter; depth-1 H3 → collection, depth-2 H3 → section, `<A>` → link; non-http(s) URLs skipped; runs in a single SQLite transaction
+- **Import modal:** single "Import data…" button opens a modal with radio cards (ctrlTAB / Linkwarden / Bookmarks); `accept` attribute on the file input switches per radio selection; submit disabled until file selected; auto-closes 2s after success

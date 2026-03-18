@@ -112,9 +112,13 @@ ctrlTAB is now available at `http://localhost:8090`. Log in with your admin cred
 - [x] Two-column section layout (user preference)
 - [x] Global search across all links and collections
 - [x] Dutch language support (EN/NL, browser-language detection, user override in Settings)
-- [ ] Descriptions for collections, sections, and links
+- [x] Spanish (Latin American) language support (EN/NL/ES)
+- [x] JSON export (full backup of your collections, sections and links)
 - [x] Import from Linkwarden (JSON export)
-- [ ] Import/export (other formats: HTML bookmarks, Raindrop, Pocket)
+- [x] Import ctrlTAB backup (JSON restore)
+- [x] Import browser bookmarks (Netscape HTML format — Chrome, Firefox, etc.)
+- [ ] Descriptions for collections, sections, and links
+- [ ] Import from other services (Raindrop, Pocket)
 - [ ] Tags and filtering
 - [ ] Browser extension for quick saving
 - [ ] Keyboard shortcuts
