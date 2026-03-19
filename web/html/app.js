@@ -494,6 +494,19 @@ async function loadCollections() {
             const lastId = parseInt(localStorage.getItem('ctrltab-last-collection'));
             const last = lastId && collections.find(c => c.id === lastId);
             selectCollection(last ? last.id : collections[0].id);
+        } else if (collections.length === 0) {
+            elements.sectionsContainer.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">⌘</div>
+                    <p>${t('collection.empty')}</p>
+                    <button class="btn-primary" onclick="showAddCollectionModal()" style="margin-top: var(--spacing-lg);">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M8 3V13M3 8H13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        ${t('collection.empty_btn')}
+                    </button>
+                </div>
+            `;
         }
     } catch (error) {
         console.error('Failed to load collections:', error);
@@ -2184,12 +2197,20 @@ document.addEventListener('keydown', (e) => {
         clearSearch();
         return;
     }
-    if (e.key === '/' && !elements.modal.classList.contains('active')) {
-        const tag = document.activeElement?.tagName;
-        if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
-            e.preventDefault();
-            elements.searchInput?.focus();
-        }
+    const tag = document.activeElement?.tagName;
+    const inInput = tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement?.isContentEditable;
+    const modalOpen = elements.modal.classList.contains('active');
+
+    if (e.key === '/' && !modalOpen && !inInput) {
+        e.preventDefault();
+        elements.searchInput?.focus();
+        return;
+    }
+
+    // Focus-on-type: single printable character → focus search bar and pass through
+    if (!modalOpen && !inInput && e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        elements.searchInput?.focus();
+        // Don't preventDefault — let the keypress land in the now-focused input
     }
 });
 

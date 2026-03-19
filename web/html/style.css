@@ -528,15 +528,15 @@ html.has-user-bg.has-user-bg-dim[data-theme="batman"] .grid-background {
     margin-bottom: var(--spacing-2xl);
 }
 
-/* Two-column section layout (niet voor settings) */
-html.two-col-layout .sections-container:not(:has(> .settings-section)) {
+/* Two-column section layout (niet voor settings of zoekresultaten) */
+html.two-col-layout .sections-container:not(:has(> .settings-section)):not(:has(> .search-results-container)) {
     display: grid;
     grid-template-columns: 1fr 1fr;
     align-items: start;
     gap: var(--spacing-2xl);
 }
 
-html.two-col-layout .sections-container:not(:has(> .settings-section)) .section {
+html.two-col-layout .sections-container:not(:has(> .settings-section)):not(:has(> .search-results-container)) .section {
     margin-bottom: 0;
 }
 

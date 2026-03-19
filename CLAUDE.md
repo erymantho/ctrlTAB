@@ -252,7 +252,9 @@ Admin credentials are checked and updated on every startup if env vars have chan
 - **Ownership checks** in the API: every route verifies the logged-in user owns the collection/section/link via helper functions `ownsCollection`, `ownsSection`, `ownsLink`
 - **`sort_order`** is used for ordering; reorder endpoints save the new order as integer indices
 - **Keyboard shortcuts:** `/` focuses the search input (when no input/modal is active), `Escape` clears search when `currentView === 'search'`
-- **Search:** sidebar search bar above the collections header; `Enter` in the search input opens the first result; clicking a collection always clears the search state
+- **Focus-on-type:** any printable character typed outside an input/modal automatically focuses the search bar and passes the keystroke through; modifier combos (`Ctrl`, `Cmd`, `Alt`) are ignored
+- **Search:** sidebar search bar above the collections header; `Enter` in the search input opens the first result; clicking a collection always clears the search state; search results are always rendered in a single column regardless of the two-column layout setting
+- **Empty state flash fix:** `index.html` starts with an empty `sectionsContainer`; the "Create your first collection" empty state is only injected by JS after `loadCollections()` returns with 0 results — preventing the false flash on every page load
 - **i18n:** `i18n.js` defines `TRANSLATIONS` (EN/NL/ES), `t(key, vars)` with `{var}` interpolation, `detectLang()` (localStorage → `navigator.language` → fallback `en`). `applyTranslations()` walks `data-i18n*` attributes. Language persisted as `ctrltab-lang` in localStorage.
 - **Flash prevention conflict:** inline `<script>` in `index.html`/`login.html` uses `var th` (not `var t`) to avoid shadowing the global `t()` translation function.
 - **Linkwarden import:** mapping is Linkwarden collection → ctrlTAB collection + one section named "Links"; sub-collections (parentID != null) are treated as top-level collections; tags are ignored; entire import runs in a single SQLite transaction

@@ -21,7 +21,7 @@ A lightweight, self-hosted bookmark and link manager to organize your links into
 - 🎨 **Themes** — Light, Dark, OLED, Cyberpunk, and Batman
 - 🎨 **Accent Color** — Per-user accent color with preset palette and custom color picker
 - 🖼️ **Custom Background** — Upload a personal background image, works across all themes
-- 🔍 **Search** — Global search across all links and collections
+- 🔍 **Search** — Global search across all links and collections; type anywhere to instantly focus the search bar
 - ⬜ **Two-column layout** — Optional two-column section layout per user preference
 - ↕️ **Drag & Drop** — Reorder links and sections by dragging; reset to A-Z with one click
 - 👤 **User Accounts** — Multi-user with admin panel and JWT authentication
@@ -121,7 +121,8 @@ ctrlTAB is now available at `http://localhost:8090`. Log in with your admin cred
 - [ ] Import from other services (Raindrop, Pocket)
 - [ ] Tags and filtering
 - [ ] Browser extension for quick saving
-- [ ] Keyboard shortcuts
+- [x] Focus-on-type search (type anywhere to instantly focus the search bar)
+- [ ] More keyboard shortcuts
 
 ---
 
