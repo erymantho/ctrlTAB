@@ -1250,7 +1250,9 @@ async function handleExport(btn) {
     statusEl.textContent = t('export.exporting');
 
     try {
-        const res = await apiRequest('/export');
+        const res = await fetch(`${API_BASE}/export`, {
+            headers: { 'Authorization': `Bearer ${getAuthToken()}` },
+        });
         if (!res.ok) {
             const data = await res.json().catch(() => ({}));
             throw new Error(data.error || t('export.failed'));
