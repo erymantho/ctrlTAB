@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'ctrltab-v4';
+const CACHE_VERSION = 'ctrltab-v5';
 const STATIC_ASSETS = [
     '/',
     '/index.html',

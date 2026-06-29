@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <defs>
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P');
-      .ct { fill: #212529; }
-      @media (prefers-color-scheme: dark) { .ct { fill: #ffffff; } }
-    </style>
-  </defs>
-  <text x="4" y="73" font-family="'Press Start 2P', monospace" font-size="46">
-    <tspan class="ct">c</tspan><tspan fill="#e2003d">T</tspan>
-  </text>
+  <style>
+    .c { fill: #212529; }
+    @media (prefers-color-scheme: dark) { .c { fill: #ffffff; } }
+  </style>
+  <!-- c: top cap, left bar, bottom cap -->
+  <rect class="c" x="10" y="10" width="30" height="20"/>
+  <rect class="c" x="0"  y="30" width="20" height="40"/>
+  <rect class="c" x="10" y="70" width="30" height="20"/>
+  <!-- T: cross bar + stem -->
+  <rect fill="#e2003d" x="60" y="10" width="40" height="20"/>
+  <rect fill="#e2003d" x="70" y="30" width="20" height="60"/>
 </svg>

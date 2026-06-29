@@ -575,15 +575,15 @@ html.has-yt-bg.has-user-bg-dim .yt-bg-dim {
     margin-bottom: var(--spacing-2xl);
 }
 
-/* Two-column section layout (niet voor settings of zoekresultaten) */
-html.two-col-layout .sections-container:not(:has(> .settings-section)):not(:has(> .search-results-container)) {
+/* Two-column section layout (niet voor settings, zoekresultaten of empty states) */
+html.two-col-layout .sections-container:not(:has(> .settings-section)):not(:has(> .search-results-container)):not(:has(> .empty-state)) {
     display: grid;
     grid-template-columns: 1fr 1fr;
     align-items: start;
     gap: var(--spacing-2xl);
 }
 
-html.two-col-layout .sections-container:not(:has(> .settings-section)):not(:has(> .search-results-container)) .section {
+html.two-col-layout .sections-container:not(:has(> .settings-section)):not(:has(> .search-results-container)):not(:has(> .empty-state)) .section {
     margin-bottom: 0;
 }
 
@@ -621,7 +621,7 @@ html.two-col-layout .sections-container:not(:has(> .settings-section)):not(:has(
 
 .links-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: var(--spacing-lg);
 }
 
@@ -1656,7 +1656,7 @@ input:checked + .toggle-track::after {
 
 @media (max-width: 1024px) {
     .links-grid {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     }
 }
 
